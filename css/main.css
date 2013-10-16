@@ -1,0 +1,37 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	font-family: Helvetica, Tahoma, Arial, sans-serif;
+}
+
+body {
+	background: #fff;
+}
+
+a {
+    text-decoration:none;
+}
+
+a:hover {
+}
+
+a:visited {
+}
+
+a:active {
+}
+
+#stat {
+	position: absolute;
+	top:5px;
+	right: 10px;
+}
+
+#post_no {
+	width: 30px;
+	text-align: center;
+}
+
+#post_title {
+	position: relative;
+}
