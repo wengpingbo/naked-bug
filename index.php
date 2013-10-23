@@ -36,9 +36,9 @@ function build_post_list($path, $start, $num)
 	for($i=$start; $i<$end; $i++ )
 	{
 		$tem ='<tr><td id="post_no">' . $i;
-		$tem .= '</td><td id="post_title"><a href="' . $posts[$i];
+		$tem .= '</td><td><div id="post_title"><a href="' . $posts[$i];
 		$tem .= '">' . basename($posts[$i], ".html");
-		$tem .= '</a><span id="stat"><span class="badge badge-info"><i class="icon-eye-open"></i>108</span>&nbsp;&nbsp;<span class="badge"><i class="icon-comment"></i>23</span></span></td></tr>';
+		$tem .= '</a><div id="stat"><span class="badge badge-info"><i class="icon-eye-open"></i>108</span>&nbsp;&nbsp;<span class="badge"><i class="icon-comment"></i>23</span></div></div></td></tr>';
 		$retstr .= $tem;
 	}
 	$retstr .='</tbody></table>';
