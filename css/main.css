@@ -52,6 +52,8 @@ a:active {
 }
 
 #header span {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
+  font-style: italic;
+  margin-left: 30px;
 }
