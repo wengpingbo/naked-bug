@@ -52,7 +52,7 @@ asciidoc.install(2);
 <h2 id="_环境搭建">环境搭建</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>在实现我们的目标之前，我们需要搭建自己的工作环境。在这里，假设你的主机上已经有gcc本地编译环境，并运行Ubuntu 12.10。但是这并不影响在其他的linux平台上进行，只要修改一下对应的命令就可以了。</p></div>
-<div class="paragraph"><p>首先，我们需要下载一个ARM交叉工具链。你可以在网上下载源码自己编译，也可以下载已经编译好的工具链。在工具链中有基本的ARM编译工具，比如：gcc, gdb, addr2line, nm, objcopy, objdump等。可能你会问，这些工具本机不是已经有了么？如果不出意外，我想你的主机应该是x86架构的。不同的架构，有不同的指令集，你不能拿一个x86的执行文件放到一个ARM机器上执行。所以我们需要一个能够在x86架构上生成ARM可执行程序的GCC编译器。有很多预先编译好的ARM工具链，这里使用的是CodeSourcery <span class="footnote span9 pull-right" id="_footnote_Download CodeSourcery"><br>[<a href="https://sourcery.mentor.com/GNUToolchain/release2449">https://sourcery.mentor.com/GNUToolchain/release2449</a>]<br></span> 。更多关于toolchain的信息可以在elinux.org找到 <span class="footnote span9 pull-right" id="_footnote_toolchain"><br>[<a href="http://elinux.org/Toolchains">http://elinux.org/Toolchains</a>]<br></span> 。下载下来后，直接解压，放到某个目录，然后配置一下PATH环境变量，这里是这样配置的：</p></div>
+<div class="paragraph"><p>首先，我们需要下载一个ARM交叉工具链。你可以在网上下载源码自己编译，也可以下载已经编译好的工具链。在工具链中有基本的ARM编译工具，比如：gcc, gdb, addr2line, nm, objcopy, objdump等。可能你会问，这些工具本机不是已经有了么？如果不出意外，我想你的主机应该是x86架构的。不同的架构，有不同的指令集，你不能拿一个x86的执行文件放到一个ARM机器上执行。所以我们需要一个能够在x86架构上生成ARM可执行程序的GCC编译器。有很多预先编译好的ARM工具链，这里使用的是CodeSourcery <span class="footnote" id="_footnote_Download CodeSourcery"><br>[<a href="https://sourcery.mentor.com/GNUToolchain/release2449">https://sourcery.mentor.com/GNUToolchain/release2449</a>]<br></span> 。更多关于toolchain的信息可以在elinux.org找到 <span class="footnote" id="_footnote_toolchain"><br>[<a href="http://elinux.org/Toolchains">http://elinux.org/Toolchains</a>]<br></span> 。下载下来后，直接解压，放到某个目录，然后配置一下PATH环境变量，这里是这样配置的：</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.4
 by Lorenzo Bettini
@@ -106,7 +106,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>make -j<span style="color: #993399">12</span> <span style="color: #009900">ARCH</span><span style="color: #990000">=</span>arm <span style="color: #009900">CROSS_COMPILE</span><span style="color: #990000">=</span>arm-none-linux-gnueabi-
 注意，如果交叉编译环境没有配置好，这个地方会提示找不到对应的gcc编译器。这里-j<span style="color: #993399">12</span>是指定编译线程为<span style="color: #993399">12</span>个，ARCH是指定目标架构为arm，所用的交叉编译器arm-none-linux-gnueabi-。</tt></pre></div></div>
-<div class="paragraph"><p>OK，kernel已经编译好了，那么我们需要用qemu把它跑起来。关于qemu的具体使用，请看qemu的官方文档 <span class="footnote span9 pull-right" id="_footnote_Qemu User Document"><br>[<a href="http://qemu.weilnetz.de/qemu-doc.html">http://qemu.weilnetz.de/qemu-doc.html</a>]<br></span> ，这里直接给出命令：</p></div>
+<div class="paragraph"><p>OK，kernel已经编译好了，那么我们需要用qemu把它跑起来。关于qemu的具体使用，请看qemu的官方文档 <span class="footnote" id="_footnote_Qemu User Document"><br>[<a href="http://qemu.weilnetz.de/qemu-doc.html">http://qemu.weilnetz.de/qemu-doc.html</a>]<br></span> ，这里直接给出命令：</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.4
 by Lorenzo Bettini
@@ -122,8 +122,8 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">CONFIG_CMDLINE</span><span style="color: #990000">=</span><span style="color: #FF0000">"console=ttyAMA0 root=/dev/ram0"</span></tt></pre></div></div>
 <div class="paragraph"><p>保存.config，重新编译kernel，并用qemu加载。现在终于有输出了。如果不出意外，kernel应该会停在找不到根文件系统，并跳出一个panic。为什么会找不到根文件系统？因为我们压根就没有给它传递过，当然找不到。</p></div>
-<div class="paragraph"><p>那现在是不是应该制作我们自己的根文件系统了。先别急，为了让后面的路好走一点，我们这里还需对内核进行一些配置。首先，我们需要用ARM EABI去编译kernel，这样我们才能让kernel运行我们交叉编译的用户态程序，因为我们所有的程序都是用gnueabi的编译器编译的。具体可以看wikipedia相关页面 <span class="footnote span9 pull-right" id="_footnote_EABI"><br>[<a href="http://en.wikipedia.org/wiki/Application_binary_interface">http://en.wikipedia.org/wiki/Application_binary_interface</a>]<br></span> ，你也可以简单的理解为嵌入式的ABI。其次，我们需要把对kernel module的支持去掉，这样可以把相关的驱动都编译到一个文件里，方便我们之后的加载。</p></div>
-<div class="paragraph"><p>当然，你可以使能kernel的debug选项，这样就可以调试内核了，并打印很多调试信息。这里就不再说了，如果感兴趣，可以看我之前写的关于kernel调试的文章 <span class="footnote span9 pull-right"><br>[kernel debug]<br></span> 。</p></div>
+<div class="paragraph"><p>那现在是不是应该制作我们自己的根文件系统了。先别急，为了让后面的路好走一点，我们这里还需对内核进行一些配置。首先，我们需要用ARM EABI去编译kernel，这样我们才能让kernel运行我们交叉编译的用户态程序，因为我们所有的程序都是用gnueabi的编译器编译的。具体可以看wikipedia相关页面 <span class="footnote" id="_footnote_EABI"><br>[<a href="http://en.wikipedia.org/wiki/Application_binary_interface">http://en.wikipedia.org/wiki/Application_binary_interface</a>]<br></span> ，你也可以简单的理解为嵌入式的ABI。其次，我们需要把对kernel module的支持去掉，这样可以把相关的驱动都编译到一个文件里，方便我们之后的加载。</p></div>
+<div class="paragraph"><p>当然，你可以使能kernel的debug选项，这样就可以调试内核了，并打印很多调试信息。这里就不再说了，如果感兴趣，可以看我之前写的关于kernel调试的文章 <span class="footnote"><br>[kernel debug]<br></span> 。</p></div>
 <div class="paragraph"><p>总结起来，这一次我们对.config做了如下修改：</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.4
@@ -143,7 +143,7 @@ CONFIG_CMDLINE<span style="color: #990000">=</span><span style="color: #FF0000">
 <div class="sectionbody">
 <div class="paragraph"><p>如果你注意到了之前传递给kernel的参数，你会发现有一个root=/dev/ram0的参数。没错，这就是给kernel指定的根文件系统，kernel检查到这个参数的时候，会到指定的地方加载根文件系统，并执行其中的init程序。这样就不会出现刚才那种情况，找不到根文件系统了。</p></div>
 <div class="paragraph"><p>我们的目标就是让kernel挂载我们的ramfs根文件系统，并且在执行init程序的时候，调用busybox中的一个shell，这样我们就有一个可用的shell来和系统进行交互了。</p></div>
-<div class="paragraph"><p>整个ramfs中的核心就是一个busybox可执行文件。busybox就像是一把瑞士军刀，可以把很多linux下的命令(比如：cp, rm, whoami等)全部集成到一个可执行文件 <span class="footnote span9 pull-right" id="_footnote_Busybox"><br>[<a href="http://www.ibm.com/developerworks/library/l-busybox/">http://www.ibm.com/developerworks/library/l-busybox/</a>]<br></span> 。这为制作嵌入式根文件系统提供了很大的便利，开发者不用单独编译每一个要支持的命令，还不用考虑库的依赖关系。基本上每一个制作嵌入式系统的开发者的首选就是busybox。</p></div>
+<div class="paragraph"><p>整个ramfs中的核心就是一个busybox可执行文件。busybox就像是一把瑞士军刀，可以把很多linux下的命令(比如：cp, rm, whoami等)全部集成到一个可执行文件 <span class="footnote" id="_footnote_Busybox"><br>[<a href="http://www.ibm.com/developerworks/library/l-busybox/">http://www.ibm.com/developerworks/library/l-busybox/</a>]<br></span> 。这为制作嵌入式根文件系统提供了很大的便利，开发者不用单独编译每一个要支持的命令，还不用考虑库的依赖关系。基本上每一个制作嵌入式系统的开发者的首选就是busybox。</p></div>
 <div class="paragraph"><p>busybox也是采用Kconfig来管理配置选项，所以配置和编译busybox和kernel没有多大区别。busybox很灵活，你可以自由取舍你想要支持的命令，并且还可以添加你自己写的程序。在编译busybox的时候，为了简单省事，我们这里采用静态编译，这样就不用为busybox准备其他libc，ld等依赖库了。
 具体命令如下：</p></div>
 <div class="listingblock">
@@ -222,7 +222,7 @@ echo <span style="color: #FF0000">"drop to shell..."</span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">exit</span></span> <span style="color: #993399">0</span></tt></pre></div></div>
 <div class="paragraph"><p>我们把这个脚本保存在~/armsource目录下。在这个脚本中，我们通过busybox --install -s来构建基本文件系统，挂载相应的虚拟文件系统，然后就调用busybox自带的shell。</p></div>
-<div class="paragraph"><p>现在我们已经编译好了busybox，并准备好了相应的init脚本。我们需要考虑根文件系统的目录结构了。kenel支持很多种文件系统，比如：ext4, ext3, ext2, cramfs, nfs, jffs2, reiserfs等，还包括一些伪文件系统: sysfs, proc, ramfs等。而在kernel初始化完成后，会尝试挂载一个它所支持的根文件系统。根文件系统的目录结构标准是FHS，由一些kernel开发者制定，感兴趣的可以看wikipedia相关页面 <span class="footnote span9 pull-right" id="_footnote_FHS"><br>[<a href="http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard</a>]<br></span> 。</p></div>
+<div class="paragraph"><p>现在我们已经编译好了busybox，并准备好了相应的init脚本。我们需要考虑根文件系统的目录结构了。kenel支持很多种文件系统，比如：ext4, ext3, ext2, cramfs, nfs, jffs2, reiserfs等，还包括一些伪文件系统: sysfs, proc, ramfs等。而在kernel初始化完成后，会尝试挂载一个它所支持的根文件系统。根文件系统的目录结构标准是FHS，由一些kernel开发者制定，感兴趣的可以看wikipedia相关页面 <span class="footnote" id="_footnote_FHS"><br>[<a href="http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard</a>]<br></span> 。</p></div>
 <div class="paragraph"><p>由于我们要制作一个很简单的ramfs，其中只有一个busybox可执行文件，所以我们没必要过多的考虑什么标准。只需一些必须的目录结构就OK。这里，我们使用的目录结构如下：</p></div>
 <div class="listingblock">
 <div class="content monospaced">
@@ -255,7 +255,7 @@ cp <span style="color: #990000">~</span>/armsource/init <span style="color: #990
 touch etc/init<span style="color: #990000">.</span>d/rcS
 chmod <span style="color: #990000">+</span>x bin/busybox etc/init<span style="color: #990000">.</span>d/rcS init</tt></pre></div></div>
 <div class="paragraph"><p>现在我们有了基本的initramfs，万事具备了，就差点东风了。这个东风就是怎样制作intramfs镜像，并让kernel加载它。</p></div>
-<div class="paragraph"><p>在kernel文档中，对initramfs和initrd有详细的说明 <span class="footnote span9 pull-right" id="_footnote_initrd"><br>[<a href="http://www.ibm.com/developerworks/library/l-initrd/index.html">http://www.ibm.com/developerworks/library/l-initrd/index.html</a>]<br></span> <span class="footnote span9 pull-right" id="_footnote_Initrd/Initramfs"><br>[<a href="http://wiki.sourcemage.org/HowTo(2f)Initramfs.html">http://wiki.sourcemage.org/HowTo(2f)Initramfs.html</a>]<br></span> 。initramfs其实就是一个用gzip压缩的cpio文件。我们可以把initramfs直接集成到kernel里，也可以单独加载initramfs。在kernel源码的scripts目录下，有一个gen_initramfs_list.sh脚本，专门是用来生成initramfs镜像和initramfs list文件。你可以通过如下方式自动生成initramfs镜像：</p></div>
+<div class="paragraph"><p>在kernel文档中，对initramfs和initrd有详细的说明 <span class="footnote" id="_footnote_initrd"><br>[<a href="http://www.ibm.com/developerworks/library/l-initrd/index.html">http://www.ibm.com/developerworks/library/l-initrd/index.html</a>]<br></span> <span class="footnote" id="_footnote_Initrd/Initramfs"><br>[<a href="http://wiki.sourcemage.org/HowTo(2f)Initramfs.html">http://wiki.sourcemage.org/HowTo(2f)Initramfs.html</a>]<br></span> 。initramfs其实就是一个用gzip压缩的cpio文件。我们可以把initramfs直接集成到kernel里，也可以单独加载initramfs。在kernel源码的scripts目录下，有一个gen_initramfs_list.sh脚本，专门是用来生成initramfs镜像和initramfs list文件。你可以通过如下方式自动生成initramfs镜像：</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 3.1.4
 by Lorenzo Bettini
@@ -476,11 +476,11 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sect1">
 <h2 id="_结语">结语</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>到这里，我们最终完成了qemu&#8201;&#8212;&#8201;&gt; uboot -&#8594; kernel -&#8594; initramfs -&#8594; hda.img这一过程 <span class="footnote span9 pull-right"><br>[<a href="http://elinux.org/Virtual_Development_Board">http://elinux.org/Virtual_Development_Board</a>]<br></span> 。而这也是制作嵌入式系统，甚至一个桌面发行版本的基本流程。如果看完这篇文章后，还对嵌入式系统念念不忘，还是建议你买一块开发板，然后真真走一遍这个过程，毕竟这是用qemu模拟的。现在有很多open source hardware project(Arduino, Beagle Board, Cubieboard，Odroid，PandaBoard，Raspberry Pi)，你可以购买他们的板子，然后移植任何自己喜欢的东西。由于是open source，你可以获取到很多资料，并且有社区支持。</p></div>
+<div class="paragraph"><p>到这里，我们最终完成了qemu&#8201;&#8212;&#8201;&gt; uboot -&#8594; kernel -&#8594; initramfs -&#8594; hda.img这一过程 <span class="footnote"><br>[<a href="http://elinux.org/Virtual_Development_Board">http://elinux.org/Virtual_Development_Board</a>]<br></span> 。而这也是制作嵌入式系统，甚至一个桌面发行版本的基本流程。如果看完这篇文章后，还对嵌入式系统念念不忘，还是建议你买一块开发板，然后真真走一遍这个过程，毕竟这是用qemu模拟的。现在有很多open source hardware project(Arduino, Beagle Board, Cubieboard，Odroid，PandaBoard，Raspberry Pi)，你可以购买他们的板子，然后移植任何自己喜欢的东西。由于是open source，你可以获取到很多资料，并且有社区支持。</p></div>
 </div>
 </div>
 </div>
-<div id="footnotes"><hr></div>
+<div id="footnotes" class="span9 pull-right"><hr></div>
 </div> <!-- span9 content -->
 </div> <!-- row-fluid -->
 </div> <!-- container -->
