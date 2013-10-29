@@ -36,3 +36,10 @@ a:active {
 #post_title {
 	position: relative;
 }
+
+#header_bg {
+  height: 200px;
+  margin-bottom: 20px;
+  background: url('img/bg.gif') repeat-x;
+}
+
