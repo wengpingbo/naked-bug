@@ -1,0 +1,384 @@
+利用qemu模拟嵌入式系统制作全过程
+================================
+WEN Pingbo <wengpingbo@gmail.com>
+
+这篇文章，将介绍如何用qemu来搭建一个基于ARM的嵌入式linux系统。通过该文章，你可以学习到如何配置kernel，如何交叉编译kernel，如何配置busybox并编译，如何制作initramfs，如何制作根文件系统，如何定制自己的uboot，如何通过uboot向kernel传递参数等。开始干活！
+
+== 环境搭建
+在实现我们的目标之前，我们需要搭建自己的工作环境。在这里，假设你的主机上已经有gcc本地编译环境，并运行Ubuntu 12.10。但是这并不影响在其他的linux平台上进行，只要修改一下对应的命令就可以了。
+
+首先，我们需要下载一个ARM交叉工具链。你可以在网上下载源码自己编译，也可以下载已经编译好的工具链。在工具链中有基本的ARM编译工具，比如：gcc, gdb, addr2line, nm, objcopy, objdump等。可能你会问，这些工具本机不是已经有了么？如果不出意外，我想你的主机应该是x86架构的。不同的架构，有不同的指令集，你不能拿一个x86的执行文件放到一个ARM机器上执行。所以我们需要一个能够在x86架构上生成ARM可执行程序的GCC编译器。有很多预先编译好的ARM工具链，这里使用的是CodeSourcery footnoteref:[Download CodeSourcery, https://sourcery.mentor.com/GNUToolchain/release2449] 。更多关于toolchain的信息可以在elinux.org找到 footnoteref:[toolchain, http://elinux.org/Toolchains] 。下载下来后，直接解压，放到某个目录，然后配置一下PATH环境变量，这里是这样配置的：
+[source, sh]
+export PATH=~/arm-2013.05/bin:$PATH
+
+配置完ARM交叉工具链后，我们需要下载一些源码，并安装一些软件。
+命令如下：
+[source, sh]
+----
+# install qemu
+sudo apt-get install qemu qemu-kvm qemu-kvm-extras qemu-user qemu-system
+# install mkimage tool
+sudo apt-get install uboot-mkimage
+# install git
+sudo apt-get install git
+# prepare related directory
+mkdir -pv ~/armsource/{kernel,uboot,ramfs,busybox}
+# download latest kernel stable code to kernel dir
+git clone http://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git ~/armsource/kernel
+# download latest u-boot code to uboot dir
+git clone git://git.denx.de/u-boot.git ~/armsource/uboot
+# download latest busybox code to busybox dir
+git clone git://busybox.net/busybox.git ~/armsource/busybox
+----
+
+== 配置kernel
+环境搭建完后，我们就正式进入主题了。现在我们需要配置kernel源码，编译，并用qemu运行我们自己编译的kernel。这样我们就能够对我们的kernel进行测试，并做出对应的修改。
+
+进入kernel源码目录，我们需要找最新的kernel稳定版本。在写这篇文章的时候，最新的稳定版本是3.10.10。我们可以通过git切换到3.10.10。由于我们编译的内核需要运行在ARM上，所以我们应该到arch/arm/configs下找到对应我们设备的kernel配置文件。但是我们没有实际意义上的设备，而是用qemu模拟的设备，所以我们应该选择qemu能够模拟的设备的配置文件。这里我们选择常用的versatile_defconfig。
+对应的命令如下：
+[source, sh]
+----
+cd ~/armsource/kernel
+# checkout a tag and create a branch
+git checkout v3.10.10 -b linux-3.10.10
+# create .config file
+make versatile_defconfig ARCH=arm
+----
+
+配置完了，我们就可以编译了。编译的时候，我们可以用多个线程来加速编译，具体用多少个就要看你主机的配置了。这里我们用12个线程编译，命令如下：
+[source, sh]
+make -j12 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi-
+注意，如果交叉编译环境没有配置好，这个地方会提示找不到对应的gcc编译器。这里-j12是指定编译线程为12个，ARCH是指定目标架构为arm，所用的交叉编译器arm-none-linux-gnueabi-。
+
+OK，kernel已经编译好了，那么我们需要用qemu把它跑起来。关于qemu的具体使用，请看qemu的官方文档 footnoteref:[Qemu User Document, http://qemu.weilnetz.de/qemu-doc.html] ，这里直接给出命令：
+[source, sh]
+qemu-system-arm -M versatilepb -kernel arch/arm/boot/zImage -nographic
+这里-M是指定模拟的具体设备型号，versatile系列的pb版本，-kernel指定的是对应的内核，-nographic是把qemu输出直接导向到当前终端。
+
+好，命令成功执行了。但是，好像没有任何有效输出。我们通过C-a x来退出qemu。编译的kernel好像不怎么好使，配置文件肯定有问题。打开.config配置文件，发现传递给kernel的参数没有指定console，难怪没有输出。我们定位到CMDLINE，并加入console参数：
+[source, sh]
+CONFIG_CMDLINE="console=ttyAMA0 root=/dev/ram0"
+
+保存.config，重新编译kernel，并用qemu加载。现在终于有输出了。如果不出意外，kernel应该会停在找不到根文件系统，并跳出一个panic。为什么会找不到根文件系统？因为我们压根就没有给它传递过，当然找不到。
+
+那现在是不是应该制作我们自己的根文件系统了。先别急，为了让后面的路好走一点，我们这里还需对内核进行一些配置。首先，我们需要用ARM EABI去编译kernel，这样我们才能让kernel运行我们交叉编译的用户态程序，因为我们所有的程序都是用gnueabi的编译器编译的。具体可以看wikipedia相关页面 footnoteref:[EABI, http://en.wikipedia.org/wiki/Application_binary_interface] ，你也可以简单的理解为嵌入式的ABI。其次，我们需要把对kernel module的支持去掉，这样可以把相关的驱动都编译到一个文件里，方便我们之后的加载。
+
+当然，你可以使能kernel的debug选项，这样就可以调试内核了，并打印很多调试信息。这里就不再说了，如果感兴趣，可以看我之前写的关于kernel调试的文章 footnote:[kernel debug] 。
+
+总结起来，这一次我们对.config做了如下修改：
+[source, C]
+----
+# CONFIG_MODULES is not set
+CONFIG_AEABI=y
+CONFIG_OABI_COMPAT=y
+CONFIG_PRINTK_TIME=y
+CONFIG_EARLY_PRINTK=y
+CONFIG_CMDLINE="earlyprintk console=ttyAMA0 root=/dev/ram0"
+----
+
+== 通过busybox制作initramfs镜像
+如果你注意到了之前传递给kernel的参数，你会发现有一个root=/dev/ram0的参数。没错，这就是给kernel指定的根文件系统，kernel检查到这个参数的时候，会到指定的地方加载根文件系统，并执行其中的init程序。这样就不会出现刚才那种情况，找不到根文件系统了。
+
+我们的目标就是让kernel挂载我们的ramfs根文件系统，并且在执行init程序的时候，调用busybox中的一个shell，这样我们就有一个可用的shell来和系统进行交互了。
+
+整个ramfs中的核心就是一个busybox可执行文件。busybox就像是一把瑞士军刀，可以把很多linux下的命令(比如：cp, rm, whoami等)全部集成到一个可执行文件 footnoteref:[Busybox, http://www.ibm.com/developerworks/library/l-busybox/] 。这为制作嵌入式根文件系统提供了很大的便利，开发者不用单独编译每一个要支持的命令，还不用考虑库的依赖关系。基本上每一个制作嵌入式系统的开发者的首选就是busybox。
+
+busybox也是采用Kconfig来管理配置选项，所以配置和编译busybox和kernel没有多大区别。busybox很灵活，你可以自由取舍你想要支持的命令，并且还可以添加你自己写的程序。在编译busybox的时候，为了简单省事，我们这里采用静态编译，这样就不用为busybox准备其他libc，ld等依赖库了。
+具体命令如下：
+[source, sh]
+----
+cd ~/armsource/busybox
+# using stable version 1.21
+git checkout origin/1_21_stable -b busybox-1.21
+# using default configure
+make defconfig ARCH=arm
+# compile busybox in static
+make menuconfig
+make -j12 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi-
+----
+
+编译完后，我们就得到一个busybox静态链接的文件。
+
+接下来，我们需要一个init程序。这个程序将是kernel执行的第一个用户态的程序，我们需要它来产生一个可交互的shell。在桌面级别的linux发行版本，使用的init程序一般是System V init(传统的init)，upstart(ubuntu)，systemd(fedora)等。busybox也带有一个init程序，但是我们想自己写一个。既然自己写，那有两种实现方式，用C和libc实现，或者写一个shell脚本。
+
+为了简单，这里选择后者，具体脚本如下：
+[source, sh]
+----
+#!/bin/sh
+echo
+echo "###########################################################"
+echo "## THis is a init script for initrd/initramfs ##"
+echo "## Author: WEN Pingbo <wpb@meizu.com> ##"
+echo "## Date: 2013/08/17 16:27:34 CST ##"
+echo "###########################################################"
+echo
+
+PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+
+if [ ! -f "/bin/busybox" ];then
+echo "cat not find busybox in /bin dir, exit"
+exit 1
+fi
+
+BUSYBOX="/bin/busybox"
+
+echo "build root filesystem..."
+$BUSYBOX --install -s
+
+if [ ! -d /proc ];then
+echo "/proc dir not exist, create it..."
+$BUSYBOX mkdir /proc
+fi
+echo "mount proc fs..."
+$BUSYBOX mount -t proc proc /proc
+
+if [ ! -d /dev ];then
+echo "/dev dir not exist, create it..."
+$BUSYBOX mkdir /dev
+fi
+# echo "mount tmpfs in /dev..."
+# $BUSYBOX mount -t tmpfs dev /dev
+
+$BUSYBOX mkdir -p /dev/pts
+echo "mount devpts..."
+$BUSYBOX mount -t devpts devpts /dev/pts
+
+if [ ! -d /sys ];then
+echo "/sys dir not exist, create it..."
+$BUSYBOX mkdir /sys
+fi
+echo "mount sys fs..."
+$BUSYBOX mount -t sysfs sys /sys
+
+echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+echo "populate the dev dir..."
+$BUSYBOX mdev -s
+
+echo "drop to shell..."
+$BUSYBOX sh
+
+exit 0
+----
+
+我们把这个脚本保存在~/armsource目录下。在这个脚本中，我们通过busybox --install -s来构建基本文件系统，挂载相应的虚拟文件系统，然后就调用busybox自带的shell。
+
+现在我们已经编译好了busybox，并准备好了相应的init脚本。我们需要考虑根文件系统的目录结构了。kenel支持很多种文件系统，比如：ext4, ext3, ext2, cramfs, nfs, jffs2, reiserfs等，还包括一些伪文件系统: sysfs, proc, ramfs等。而在kernel初始化完成后，会尝试挂载一个它所支持的根文件系统。根文件系统的目录结构标准是FHS，由一些kernel开发者制定，感兴趣的可以看wikipedia相关页面 footnoteref:[FHS, http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard] 。
+
+由于我们要制作一个很简单的ramfs，其中只有一个busybox可执行文件，所以我们没必要过多的考虑什么标准。只需一些必须的目录结构就OK。这里，我们使用的目录结构如下：
+----
+├── bin
+│   ├── busybox
+│   └── sh -> busybox
+├── dev
+│   └── console
+├── etc
+│   └── init.d
+│   └── rcS
+├── init
+├── sbin
+└── usr
+├── bin
+└── sbin
+----
+你可以通过如下命令来创建这个文件系统：
+[source, sh]
+----
+cd ~/armsource/ramfs
+mkdir -pv bin dev etc/init.d sbin user/{bin,sbin}
+cp ~/armsource/busybox/busybox bin/
+ln -s busybox bin/sh
+mknod -m 644 dev/console c 5 1
+cp ~/armsource/init .
+touch etc/init.d/rcS
+chmod +x bin/busybox etc/init.d/rcS init
+----
+
+现在我们有了基本的initramfs，万事具备了，就差点东风了。这个东风就是怎样制作intramfs镜像，并让kernel加载它。
+
+在kernel文档中，对initramfs和initrd有详细的说明 footnoteref:[initrd, http://www.ibm.com/developerworks/library/l-initrd/index.html] footnoteref:[Initrd/Initramfs, http://wiki.sourcemage.org/HowTo(2f)Initramfs.html] 。initramfs其实就是一个用gzip压缩的cpio文件。我们可以把initramfs直接集成到kernel里，也可以单独加载initramfs。在kernel源码的scripts目录下，有一个gen_initramfs_list.sh脚本，专门是用来生成initramfs镜像和initramfs list文件。你可以通过如下方式自动生成initramfs镜像：
+[source, sh]
+sh scripts/gen_initramfs_list.sh -o ramfs.gz ~/armsource/ramfs
+然后修改kernel的.config配置文件来包含这个文件：
+[source, C]
+CONFIG_INITRAMFS_SOURCE="ramfs.gz"
+重新编译后，kernel就自动集成了你制作的ramfs.gz，并会在初始化完成后，加载这个根文件系统，并产生一个shell。
+
+你也可以用gen_initramfs_list.sh脚本生成一个列表文件，然后CONFIG_INITRAMFS_SOURCE中指定这个列表文件。也可以把你做的根文件系统自动集成到kernel里面。命令如下：
+[source, sh]
+sh scripts/gen_initramfs_list.sh ~/armsource/ramfs > initramfs_list
+对应的内核配置：CONFIG_INITRAMFS_SOURCE="initramfs_list"
+
+但是这里并不打算这么做，我们自己手动制作initramfs镜像，然后外部加载。命令如下：
+[source, sh]
+----
+cd ~/armsource/ramfs
+find . | cpio -o -H newc | gzip -9 > ramfs.gz
+----
+_选项-H是用来指定生成的格式_
+
+手动生成ramfs.gz后，我们就可以通过qemu来加载了，命令如下：
+[source, sh]
+qemu-system-arm -M versatilepb -kernel arch/arm/boot/zImage -nographic -initrd ramfs.gz
+
+现在我们的系统起来了，并且正确执行了我们自己写的脚本，进入了shell。我们可以在里面执行基本常用的命令。是不是有点小兴奋。
+
+== 配置物理文件系统，切换根文件系统
+不是已经配置了根文件系统，并加载了，为什么还需要切换呢？可能你还沉浸在刚才的小兴奋里，但是，很不幸的告诉你。现在制作的小linux系统还不是一个完全的系统，因为没有完成基本的初始化，尽管看上去好像已经完成了。
+
+在linux中initramfs和initrd只是一个用于系统初始化的小型文件系统，通常用来加载一些第三方的驱动。为什么要通过这种方式来加载驱动呢？因为由于版权协议的关系，如果要把驱动放到kernenl里，意味着你必须要开放源代码。但是有些时候，一些商业公司不想开源自己的驱动，那它就可以把驱动放到initramfs或者initrd。这样既不违背kernel版权协议，又达到不开源的目的。也就是说在正常的linux发行版本中，kernel初始化完成后，会先挂载initramfs/initrd，来加载其他驱动，并做一些初始化设置。然后才会挂载真真的根文件系统，通过一个switch_root来切换根文件系统，执行第二个init程序，加载各种用户程序。在这中间，linux kernel跳了两下。
+
+既然他们跳了两下，那我们也跳两下。第一下已经跳了，现在的目标是制作物理文件系统，并修改initramfs中的init脚本，来挂载我们物理文件系统，并切换root文件系统，执行对应的init。
+
+为了省事，我们直接把原先的initramfs文件系统复制一份，当作物理根文件系统。由于是模拟，所以我们直接利用dd来生成一个磁盘镜像。具体命令如下：
+[source, sh]
+-----
+dd if=/dev/zero of=~/armsource/hda.img bs=1 count=10M
+mkfs -t ext2 hda.img
+mount hda.img /mnt
+cp -r ~/armsource/ramfs/* /mnt
+umount /mnt
+----
+这样hda.img就是我们制作的物理根文件系统，ext2格式。现在我们需要修改原先在initramfs中的init脚本，让其通过busybox的switch_root功能切换根文件系统。这里需要注意的是，在切换根文件系统时，不能直接调用busybox的switch_root，而是需要通过exec来调用。这样才能让最终的init进程pid为1。
+修改后的init脚本如下：
+[source, sh]
+----
+#!/bin/sh
+echo
+echo "###########################################################"
+echo "## THis is a init script for initrd/initramfs ##"
+echo "## Author: WEN Pingbo <wpb@meizu.com> ##"
+echo "## Date: 2013/08/17 16:27:34 CST ##"
+echo "###########################################################"
+echo
+
+PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+
+if [ ! -f "/bin/busybox" ];then
+echo "cat not find busybox in /bin dir, exit"
+exit 1
+fi
+
+BUSYBOX="/bin/busybox"
+
+echo "build root filesystem..."
+$BUSYBOX --install -s
+
+if [ ! -d /proc ];then
+echo "/proc dir not exist, create it..."
+$BUSYBOX mkdir /proc
+fi
+echo "mount proc fs..."
+$BUSYBOX mount -t proc proc /proc
+
+if [ ! -d /dev ];then
+echo "/dev dir not exist, create it..."
+$BUSYBOX mkdir /dev
+fi
+# echo "mount tmpfs in /dev..."
+# $BUSYBOX mount -t tmpfs dev /dev
+
+$BUSYBOX mkdir -p /dev/pts
+echo "mount devpts..."
+$BUSYBOX mount -t devpts devpts /dev/pts
+
+if [ ! -d /sys ];then
+echo "/sys dir not exist, create it..."
+$BUSYBOX mkdir /sys
+fi
+echo "mount sys fs..."
+$BUSYBOX mount -t sysfs sys /sys
+
+echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+echo "populate the dev dir..."
+$BUSYBOX mdev -s
+
+echo "dev filesystem is ok now, log all in kernel kmsg" >> /dev/kmsg
+
+echo "you can add some third part driver in this phase..." >> /dev/kmsg
+echo "begin switch root directory to sd card" >> /dev/kmsg
+
+$BUSYBOX mkdir /newroot
+if [ ! -b "/dev/mmcblk0" ];then
+echo "can not find /dev/mmcblk0, please make sure the sd \
+card is attached correctly!" >> /dev/kmsg
+echo "drop to shell" >> /dev/kmsg
+$BUSYBOX sh
+else
+$BUSYBOX mount /dev/mmcblk0 /newroot
+if [ $? -eq 0 ];then
+echo "mount root file system successfully..." >> /dev/kmsg
+else
+echo "failed to mount root file system, drop to shell" >> /dev/kmsg
+$BUSYBOX sh
+fi
+fi
+
+# the root file system is mounted, clean the world for new root file system
+echo "" > /proc/sys/kernel/hotplug
+$BUSYBOX umount -f /proc
+$BUSYBOX umount -f /sys
+$BUSYBOX umount -f /dev/pts
+# $BUSYBOX umount -f /dev
+
+echo "enter new root..." >> /dev/kmsg
+exec $BUSYBOX switch_root -c /dev/console /newroot /init
+
+if [ $? -ne 0 ];then
+echo "enter new root file system failed, drop to shell" >> /dev/kmsg
+$BUSYBOX mount -t proc proc /proc
+$BUSYBOX sh
+fi
+----
+
+现在我们可以通过qemu来挂载hda.img，为了简单，我们这里把这个设备虚拟为sd卡，这也是为什么上面的init脚本挂载物理根文件系统时，是找/dev/mmcblk0了。具体命令如下：
+[source, sh]
+qemu-system-arm -M versatilepb -kernel arch/arm/boot/zImage -nographic -initrd ramfs.gz -sd hda.img
+如果不出意外，你可以看到这个自己做的linux系统，通过调用两个init脚本，跳到最终的hda.img上的文件系统。
+
+== 配置Uboot，加载kernel
+可能到这里，你觉得，终于把整个流程走了一遍了。但是，还差一环。之前我们都是通过qemu来直接加载我们的kernel，initramfs和物理镜像，但是在真真的嵌入式设备，这些加载过程都需要你好好考虑。那么在这一节，我们借助uboot来模拟加载过程。
+
+我们的目标是让uboot来加载kernel，initramfs，并识别qemu虚拟的sd卡设备。这里我们通过tftp来向uboot传递kernel和initramfs镜像。既然要依靠uboot来加载系统镜像，那么需要按照uboot的镜像格式制作加载的镜像。而mkimage工具，就是干这活的。在制作uboot镜像时，我们需要指定镜像类型，加载地址，执行地址等，制作uboot版的initramfs命令如下：
+[source, sh]
+mkimage -A arm -O linux -T ramdisk -C none -a 0x00808000 -e 0x00808000 -n ramdisk -d ramfs.gz ramfs-uboot.img
+_-a 和 -e分别是指定加载定制和执行地址_
+而kernel的uboot版就不需要这么手动生成了，在编译kernel的时候，可以通过make uImage来制作uboot格式镜像，默认的加载地址是0x00008000，你也可以通过LOADADDR指定你自己的加载地址，这里用默认的。
+
+镜像准备好之后，需要把这两个镜像拷贝到一个指定的目录，这样在用tftp传输的时候，能够找到对应的镜像。这里假设拷贝到~/armsource/tftp目录下。
+
+下一步，我们需要交叉编译uboot。在编译之前，我们需要对uboot进行一些配置。由于我们使用的是versatilepb，它对应的配置文件在include/configs/versatile.h中，这里对这个文件的修改如下：
+[source, C]
+----
+#define CONFIG_ARCH_VERSATILE_QEMU
+#define CONFIG_INITRD_TAG
+#define CONFIG_SYS_PROMPT "myboard > "
+#define CONFIG_BOOTCOMMAND \
+"sete ipaddr 10.0.2.15;"\
+"sete serverip 10.0.2.2;"\
+"set bootargs 'console=ttyAMA0,115200 root=/dev/mmcblk0';"\
+"tftpboot 0x00007fc0 uImage;"\
+"tftpboot 0x00807fc0 ramfs-uboot.img;"\
+"bootm 0x7fc0 0x807fc0"
+----
+_ARCH_VERSATILE_QEMU是为了让uboot为了适应qemu做一些配置上的调整_
+_INITRD_TAG是让uboot通过tag_list给kernel传递initramfs的地址，如果没有这个配置选项，kernel是找不到uboot传给他的initramfs_
+_SYS_PROMPT是指定uboot的命令提示符，你可以指定你自己的名字_
+_BOOTCOMMAND是指定uboot起来后，自动执行的命令，这里是让uboot自动设置自己的ip和tftp服务器的ip，然后设定传递给kernel的参数，最后三个命令是把kernel镜像和initramfs镜像装载进来，并从内存指定地址开始执行指令。其实这些命令，也可以在uboot起来后，自己输入_
+----
+注意：在设置uboot的ip的时候，一定要和qemu给定的ip对应。由于这里使用的qemu内部自带的tftp服务，所以这里的ip和qemu内部tftp服务器的ip在同一个网段。
+----
+
+uboot配置完之后，可以通过如下命令来编译uboot:
+[source, sh]
+----
+make versatilepb_config ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi-
+make -j12 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi-
+----
+
+如果没什么错误，就会生成一个u-boot镜像，然后我们就可以通过qemu来加载它：
+[source, sh]
+sudo qemu-system-arm -M versatilepb -kernel u-boot -m 256M -net nic -net user,tftp=~/armsource/tftp -sd hda.img -nographic
+命令执行后，你就可以和之前一样的内核加载，最后经过两次跳转，到我们的sd卡上的文件系统。
+
+== 结语
+到这里，我们最终完成了qemu -- > uboot --> kernel --> initramfs --> hda.img这一过程 footnote:[http://elinux.org/Virtual_Development_Board] 。而这也是制作嵌入式系统，甚至一个桌面发行版本的基本流程。如果看完这篇文章后，还对嵌入式系统念念不忘，还是建议你买一块开发板，然后真真走一遍这个过程，毕竟这是用qemu模拟的。现在有很多open source hardware project(Arduino, Beagle Board, Cubieboard，Odroid，PandaBoard，Raspberry Pi)，你可以购买他们的板子，然后移植任何自己喜欢的东西。由于是open source，你可以获取到很多资料，并且有社区支持。
