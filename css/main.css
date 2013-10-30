@@ -115,7 +115,7 @@ a:active {
   background-image: url(../img/glyphicons-halflings-white.png);
   opacity: 1;
 }
-.bs-docs-sidenav.affix {
+.affix {
   top: 60px;
 }
 .bs-docs-sidenav.affix-bottom {
@@ -123,3 +123,4 @@ a:active {
   top: auto;
   bottom: 270px;
 }
+
