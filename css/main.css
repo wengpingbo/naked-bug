@@ -57,3 +57,7 @@ a:active {
   font-style: italic;
   margin-left: 30px;
 }
+
+.affix {
+  top: 20px;
+}
