@@ -114,7 +114,7 @@ function trucTrueLength(str, len) {
     var a = document.createElement("a");
     a.href = "#" + entry.element.id;
 	// trucate string
-	entry.text = trucTrueLength(entry.text, 24) + '<i class="icon-chevron-right"></i>';
+	entry.text = '<i class="icon-chevron-right"></i> ' + trucTrueLength(entry.text, 24);
 
     a.appendChild(document.createTextNode(entry.text));
     var li = document.createElement("li");
