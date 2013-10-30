@@ -60,7 +60,6 @@ a:active {
 
 .bs-docs-sidenav {
   width: 228px;
-  margin: 30px 0 0;
   padding: 0;
   background-color: #fff;
   -webkit-border-radius: 6px;
@@ -116,7 +115,7 @@ a:active {
   opacity: 1;
 }
 .affix {
-  top: 60px;
+  top: 40px;
 }
 .bs-docs-sidenav.affix-bottom {
   position: absolute;
