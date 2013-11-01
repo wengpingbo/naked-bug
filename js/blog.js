@@ -6,13 +6,23 @@ var nakedBug = {
 		if(type == 0)
 		{
 		  if(nakedBug.curpage > 0) nakedBug.curpage -= 1;
-		  else {$("#previous").parent().attr("class", "disabled"); return;}
+		  else {
+			  //disable previous button
+			  $("#previous").parent().attr("class", "disabled");
+			  $("#previous").click();
+			  return;
+		  }
 		}
 		if(type == 1 )
 		{ 
 		  if(nakedBug.maxpage == 0 || nakedBug.curpage < nakedBug.maxpage) 
 			nakedBug.curpage += 1;
-		  else {$("#next").parent().attr("class", "disabled"); return;}
+		  else {
+			  //disable next button
+			  $("#next").parent().attr("class", "disabled"); 
+			  $("#next").click();
+			  return;
+		  }
 		}
 		$.get(
 			  "utils.php",
@@ -24,6 +34,18 @@ var nakedBug = {
 				  else $("#post_toc").html(data);
 			  }
 		);
+		if(type == 0 && $("#next").parent().attr("class") == "disabled")
+		{
+		  //active next button
+			 $("#next").parent().attr("class", "");
+			 $("#next").click(function() {nakedBug.getPostLists(1);}); 
+		}
+		if(type == 1 && $("#previous").parent().attr("class") == "disabled")
+		{
+		  //active previous button
+			 $("#previous").parent().attr("class", "");
+			 $("#previous").click(function() {nakedBug.getPostLists(0);}); 
+		}
 	},
 
 	indexInitialize : function() {
