@@ -22,7 +22,7 @@ function NakedBug() {
 		 document.getElementById("next").onclick = this.getPostLists(1);
 		 // load first 20 posts
 		 $.get(
-			   "utils.php"
+			   "utils.php",
 			   {op : "alist", start : 0},
 			   function(data) {
 				  document.getElementById("post_toc").innerHTML(data);
@@ -47,6 +47,7 @@ function NakedBug() {
 				function(data) {
 				  document.getElementById("footer_hook").innerHTML(data);
 				}
+		  );
 	  }
 	  )();
 }
