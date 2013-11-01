@@ -27,7 +27,7 @@ function get_post_list($path)
 function build_post_list($path, $start, $num)
 {
 	$posts=get_post_list($path);
-	if(count($posts) == 0) return "No post found in $path";
+	if(count($posts) == 0) return;
 	else if($start > count($posts)) return;
 
 	$end = $start + $num;
@@ -84,10 +84,16 @@ if(isset($_GET['op']))
 	$op=$_GET['op'];
 //$start
 if(isset($_GET['start']) && is_numeric($_GET['start']))
+{
   $start = $_GET['start'];
+  if($start < 0) $start = 0;
+}
 //$len
 if(isset($_GET['len']) && is_numeric($_GET['len']))
+{
   $len = $_GET['len'];
+  if($len <= 0) $len = 20;
+}
 
 switch ($op)
 {
