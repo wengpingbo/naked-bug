@@ -6,13 +6,13 @@ var nakedBug = {
 		if(type == 0)
 		{
 		  if(nakedBug.curpage > 0) nakedBug.curpage -= 1;
-		  else {$("#previous").attr("class", "disabled"); return;}
+		  else {$("#previous").parent().attr("class", "disabled"); return;}
 		}
 		if(type == 1 )
 		{ 
 		  if(nakedBug.maxpage == 0 || nakedBug.curpage < nakedBug.maxpage) 
 			nakedBug.curpage += 1;
-		  else {$("#next").attr("class", "disabled"); return;}
+		  else {$("#next").parent().attr("class", "disabled"); return;}
 		}
 		$.get(
 			  "utils.php",
@@ -32,7 +32,7 @@ var nakedBug = {
 		 $("#next").click(
 		   function() {nakedBug.getPostLists(1);});
 		 //disable previous page button
-		 $("#previous").attr("class", "disable");
+		 $("#previous").parent().attr("class", "disabled");
 		 // load first 20 posts
 		 $.get(
 			   "utils.php",
