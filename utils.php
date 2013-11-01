@@ -19,7 +19,7 @@ function get_post_list($path)
 			{
 			  $article=glob("$path/$value/$post/*.html");
 			  if(count($article) >=1 ) 
-				$ret[$article] = filemtime($article);
+				$ret[$article[0]] = filemtime($article[0]);
 			}
 		  }
 		}
