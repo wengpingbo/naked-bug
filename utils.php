@@ -76,7 +76,7 @@ $postpath = "article";
 // default value
 $op = "";
 $start = 0;
-$len = 20;
+$len = 14;
 
 //check get value
 //$op
@@ -92,7 +92,7 @@ if(isset($_GET['start']) && is_numeric($_GET['start']))
 if(isset($_GET['len']) && is_numeric($_GET['len']))
 {
   $len = $_GET['len'];
-  if($len <= 0) $len = 20;
+  if($len <= 0) $len = 14;
 }
 
 switch ($op)
