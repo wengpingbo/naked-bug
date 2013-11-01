@@ -17,10 +17,10 @@ var nakedBug = {
 	},
 
 	indexInitialize : function() {
-		 $("#previous").onclick = 
-		   function() {nakedBug.getPostLists(0);};
-		 $("#next").onclick = 
-		   function() {nakedBug.getPostLists(1);};
+		 $("#previous").click( 
+		   function() {nakedBug.getPostLists(0);});
+		 $("#next").click(
+		   function() {nakedBug.getPostLists(1);});
 		 // load first 20 posts
 		 $.get(
 			   "utils.php",
