@@ -1,8 +1,7 @@
 var nakedBug = {
 	//type: 0 -- previous, 1 -- next
 	getPostLists : function(type) {
-		var page = document.getElementById("page");
-		var curpage = page.dataset.curpage;
+		var curpage = $("#page").data("curpage");
 		if(type == 0 && curpage > 0) curpage--;
 		if(type == 1 ) curpage++;
 		page.dataset.curpage = curpage;
@@ -12,22 +11,22 @@ var nakedBug = {
 			  //param.
 			  {op : "alist", start : (curpage+1)*20},
 			  function(data) {
-				  document.getElementById("post_toc").innerHTML(data);
+				  $("#post_toc").append(data);
 			  }
 		);
 	},
 
 	indexInitialize : function() {
-		 document.getElementById("previous").onclick = 
+		 $("#previous").onclick = 
 		   function() {nakedBug.getPostLists(0);};
-		 document.getElementById("next").onclick = 
+		 $("#next").onclick = 
 		   function() {nakedBug.getPostLists(1);};
 		 // load first 20 posts
 		 $.get(
 			   "utils.php",
 			   {op : "alist", start : 0},
 			   function(data) {
-				  document.getElementById("post_toc").innerHTML(data);
+				  $("#post_toc").append(data);
 			   }
 		 );
 	 },
