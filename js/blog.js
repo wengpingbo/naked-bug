@@ -11,7 +11,7 @@ var nakedBug = {
 			  //param.
 			  {op : "alist", start : (curpage+1)*20},
 			  function(data) {
-				  $("#post_toc").append(data);
+				  $("#post_toc").html(data);
 			  }
 		);
 	},
@@ -26,7 +26,7 @@ var nakedBug = {
 			   "utils.php",
 			   {op : "alist", start : 0},
 			   function(data) {
-				  $("#post_toc").append(data);
+				  $("#post_toc").html(data);
 			   }
 		 );
 	 },
