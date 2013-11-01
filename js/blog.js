@@ -1,6 +1,6 @@
-function NakedBug() {
+var nakedBug = {
 	//type: 0 -- previous, 1 -- next
-	this.getPostLists = function(type) {
+	getPostLists : function(type) {
 		var page = document.getElementById("page");
 		var curpage = page.dataset.curpage;
 		if(type == 0 && curpage > 0) curpage--;
@@ -15,11 +15,13 @@ function NakedBug() {
 				  document.getElementById("post_toc").innerHTML(data);
 			  }
 		);
-	}
+	},
 
-	 this.indexInitialize = function() {
-		 document.getElementById("previous").onclick = getPostLists(0);
-		 document.getElementById("next").onclick = getPostLists(1);
+	indexInitialize : function() {
+		 document.getElementById("previous").onclick = 
+		   function() {nakedBug.getPostLists(0);};
+		 document.getElementById("next").onclick = 
+		   function() {nakedBug.getPostLists(1);};
 		 // load first 20 posts
 		 $.get(
 			   "utils.php",
@@ -28,12 +30,11 @@ function NakedBug() {
 				  document.getElementById("post_toc").innerHTML(data);
 			   }
 		 );
-	 }
+	 },
 
-	 (//common initialize...
-	  function() {
-		  //load top nav
-		  $.get(
+	Initialize : function() {
+		 //load top nav
+		 $.get(
 				"utils.php",
 				{op : "gnav"},
 				function(data) {
@@ -48,8 +49,11 @@ function NakedBug() {
 				  document.getElementById("footer_hook").innerHTML(data);
 				}
 		  );
+		var page = document.getElementByTagName("body");
+		var pagetype = page.dataset.pagetype;
+		//check current page type, index or article
+		if(pagetype == "index") nakedBug.indexInitialize();
 	  }
-	  )();
-}
+};
 
-var nakedBug = new NakedBug();
+nakedBug.Initialize();
