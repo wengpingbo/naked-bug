@@ -3,7 +3,6 @@ var nakedBug = {
 	maxpage : 0,
 	//type: 0 -- previous, 1 -- next
 	getPostLists : function(type) {
-		//var curpage = $("#page").data("curpage");
 		if(type == 0)
 		{
 		  if(nakedBug.curpage > 0) nakedBug.curpage -= 1;
@@ -15,7 +14,6 @@ var nakedBug = {
 			nakedBug.curpage += 1;
 		  else return;
 		}
-		//$("#page").data("curpage", curpage);
 		$.get(
 			  "utils.php",
 			  //if the len is not 20, you should pass $len value in below
