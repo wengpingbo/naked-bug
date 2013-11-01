@@ -7,17 +7,24 @@
 function get_post_list($path)
 {
 	if(!realpath($path)) return;
-	//else $path=realpath($path);
-	$posts=scandir($path, 0);
+	$catalog=scandir($path, 0);
 	$ret=array();
-	foreach($posts as $value)
+	foreach($catalog as $value)
 	{
 		if($value != "." && $value != ".." && is_dir("$path/$value"))
 		{
-			$post_file=glob("$path/$value/*.html");
-			if(count($post_file) >=1 ) array_push($ret, $post_file[0]);
+		  foreach(scandir("$path/$value", 0) as $post)
+		  {
+			if($post != "." && $post != ".." && is_dir("$path/$value/$post"))
+			{
+			  $article=glob("$path/$value/$post/*.html");
+			  if(count($article) >=1 ) 
+				$ret[$article] = filemtime($article);
+			}
+		  }
 		}
 	}
+	arsort($ret);
 	return $ret;
 }
 
@@ -26,19 +33,21 @@ function get_post_list($path)
  */
 function build_post_list($path, $start, $num)
 {
-	$posts=get_post_list($path);
-	if(count($posts) == 0) return;
-	else if($start > count($posts)) return;
+  $posts=get_post_list($path);
+  $postpath=array_keys($posts);
+  $postnum=count($postpath);
+	if($postnum == 0) return;
+	else if($start > $postnum) return;
 
 	$end = $start + $num;
-	if($end > count($posts)) $end=count($posts);
+	if($end > $postnum) $end=$postnum;
 
-	$retstr='<table class="table table-hover table condensed"><caption>Posts Lists</caption><thead><tr><td id="post_no">No.</td><td>Title</td></tr></thead><tbody>';
+	$retstr='<table class="table table-hover table condensed"><caption>Posts Lists</caption><thead><tr><td id="post_time">MTIME</td><td>TITLE</td></tr></thead><tbody>';
 	for($i=$start; $i<$end; $i++ )
 	{
-		$tem ='<tr><td id="post_no">' . $i;
-		$tem .= '</td><td><div id="post_title"><a href="' . $posts[$i];
-		$tem .= '">' . basename($posts[$i], ".html");
+		$tem ='<tr><td id="post_time">' . date("Y-m-d", $posts[$postpath[$i]]);
+		$tem .= '</td><td><div id="post_title"><a href="' . $postpath[$i];
+		$tem .= '">' . basename($postpath[$i], ".html");
 		$tem .= '</a><div id="stat"><span class="badge badge-info"><i class="icon-eye-open"></i>108</span>&nbsp;&nbsp;<span class="badge"><i class="icon-comment"></i>23</span></div></div></td></tr>';
 		$retstr .= $tem;
 	}
