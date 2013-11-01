@@ -33,6 +33,10 @@ a:active {
 	text-align: center;
 }
 
+thead {
+  font-weight: bold;
+}
+
 #post_title {
 	position: relative;
 }
