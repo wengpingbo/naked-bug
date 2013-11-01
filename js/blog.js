@@ -38,7 +38,7 @@ var nakedBug = {
 				"utils.php",
 				{op : "gnav"},
 				function(data) {
-				  document.getElementById("nav_hook").innerHTML(data);
+				  $("#nav_hook").append(data);
 				}
 		  );
 		  //load footer
@@ -46,10 +46,10 @@ var nakedBug = {
 				"utils.php",
 				{op : "footer"},
 				function(data) {
-				  document.getElementById("footer_hook").innerHTML(data);
+				  $("#footer_hook").append(data);
 				}
 		  );
-		var page = document.getElementByTagName("body");
+		var page = document.getElementsByTagName("body");
 		var pagetype = page.dataset.pagetype;
 		//check current page type, index or article
 		if(pagetype == "index") nakedBug.indexInitialize();
