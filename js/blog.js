@@ -9,7 +9,6 @@ var nakedBug = {
 		  else {
 			  //disable previous button
 			  $("#previous").parent().attr("class", "disabled");
-			  $("#previous").click();
 			  return;
 		  }
 		}
@@ -20,7 +19,6 @@ var nakedBug = {
 		  else {
 			  //disable next button
 			  $("#next").parent().attr("class", "disabled"); 
-			  $("#next").click();
 			  return;
 		  }
 		}
@@ -38,13 +36,11 @@ var nakedBug = {
 		{
 		  //active next button
 			 $("#next").parent().attr("class", "");
-			 $("#next").click(function() {nakedBug.getPostLists(1);}); 
 		}
 		if(type == 1 && $("#previous").parent().attr("class") == "disabled")
 		{
 		  //active previous button
 			 $("#previous").parent().attr("class", "");
-			 $("#previous").click(function() {nakedBug.getPostLists(0);}); 
 		}
 	},
 
