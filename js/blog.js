@@ -18,8 +18,8 @@ function NakedBug() {
 	}
 
 	 this.indexInitialize = function() {
-		 document.getElementById("previous").onclick = this.getPostLists(0);
-		 document.getElementById("next").onclick = this.getPostLists(1);
+		 document.getElementById("previous").onclick = getPostLists(0);
+		 document.getElementById("next").onclick = getPostLists(1);
 		 // load first 20 posts
 		 $.get(
 			   "utils.php",
