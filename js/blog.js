@@ -49,9 +49,8 @@ var nakedBug = {
 				  $("#footer_hook").append(data);
 				}
 		  );
-		var page = document.getElementsByTagName("body");
-		var pagetype = page.dataset.pagetype;
 		//check current page type, index or article
+		var pagetype = $("body").data("pagetype");
 		if(pagetype == "index") nakedBug.indexInitialize();
 	  }
 };
