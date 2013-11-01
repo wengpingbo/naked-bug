@@ -4,14 +4,14 @@ var nakedBug = {
 		var curpage = $("#page").data("curpage");
 		if(type == 0 && curpage > 0) curpage--;
 		if(type == 1 ) curpage++;
-		page.dataset.curpage = curpage;
+		$("#page").data("curpage", curpage);
 		$.get(
 			  "utils.php",
 			  //if the len is not 20, you should pass $len value in below
 			  //param.
 			  {op : "alist", start : (curpage+1)*20},
 			  function(data) {
-				  $("#post_toc").html(data);
+				  if(data.length != 0 ) $("#post_toc").html(data);
 			  }
 		);
 	},
@@ -26,7 +26,7 @@ var nakedBug = {
 			   "utils.php",
 			   {op : "alist", start : 0},
 			   function(data) {
-				  $("#post_toc").html(data);
+				  if(data.length != 0) $("#post_toc").html(data);
 			   }
 		 );
 	 },
