@@ -196,8 +196,6 @@ footnotes: function () {
       }
     }
   }
-  //force reflow
-  cont.className = cont.className;
 },
 
 install: function(toclevels) {
