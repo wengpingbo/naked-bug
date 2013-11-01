@@ -8,7 +8,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="css/main.css" rel="stylesheet">
   </head>
-  <body>
+  <body data-pagetype="index">
 	<!-- nav bar -->
 	<div id="nav_hook">
 	  <noscript>
@@ -24,10 +24,10 @@
 		<p><b>JavaScript must be enabled in your browser 
 		  to display post lists contents.</b></p></noscript>
 </div>
-<div id="page">
+<div id="page" data-curpage="0">
 <ul class="pager">
-  <li><a href="#">Previous</a></li>
-  <li><a href="#">Next</a></li>
+  <li><a id="previous" href="#">Previous</a></li>
+  <li><a id="next" href="#">Next</a></li>
 </ul>
 </div>
 	  </div>
@@ -42,9 +42,17 @@ Recent Comment
 	</div>
 </div>
 	<!-- footer -->
-<?php require 'core/footer.inc'?>
+<div id="footer_hook">
+	  <noscript>
+		<p><b>JavaScript must be enabled in your browser 
+		  to display footer contents.</b></p></noscript>
+</div>
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/blog.js"></script>
+	<script type="text/javascript">
+	  nakedBug.indexInitialize();
+	</script>
   </body>
 </html>
 

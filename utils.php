@@ -51,6 +51,11 @@ function getnavhtml()
   return file_get_contents("core/nav.inc");
 }
 
+function getfooterhtml()
+{
+  return file_get_contents("core/footer.inc");
+}
+
 /** Configure Value **/
 $postpath = "article";
 
@@ -64,6 +69,9 @@ $postpath = "article";
  * get article table
  * @start, number, start position, default 0
  * @len, number, return table length, default 20
+ *
+ * [footer]
+ * get page footer content
  */
 // default value
 $op = "";
@@ -88,6 +96,9 @@ case "gnav":
   break;
 case "alist":
   echo build_post_list($postpath, $start, $len);
+  break;
+case "footer":
+  echo getfooterhtml();
   break;
 default:
   echo "";
