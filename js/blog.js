@@ -20,7 +20,7 @@ var nakedBug = {
 			  "utils.php",
 			  //if the len is not 20, you should pass $len value in below
 			  //param.
-			  {op : "alist", start : (nakedBug.curpage+1)*20},
+			  {op : "alist", start : nakedBug.curpage*20},
 			  function(data) {
 				  if(data.length == 0 || data == "\n") nakedBug.maxpage = nakedBug.curpage;
 				  else $("#post_toc").html(data);
