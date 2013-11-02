@@ -28,6 +28,7 @@ function build_catalog($path)
   foreach($catalog as $value)
 	$ret .= '<li><a tabindex="-1" href="javascript:;">' . $value . '</a></li>';
   $ret .= '</ul></li>';
+  return $ret;
 }
 
 /**
