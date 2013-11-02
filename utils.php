@@ -27,7 +27,7 @@ function build_catalog($path)
   $ret .= '<ul id="dropdown_item" class="dropdown-menu pull-right">';
   foreach($catalog as $value)
 	$ret .= '<li><a tabindex="-1" href="javascript:;">' . $value . '</a></li>';
-  $ret .= '</ul></li>'
+  $ret .= '</ul></li>';
 }
 
 /**
