@@ -12,6 +12,7 @@ function get_catalog($path)
   foreach($catalog as $value)
 	if($value != "." && $value != ".." && is_dir("$path/$value"))
 	  array_push($ret, $value);
+  return $ret;
 }
 
 /**
