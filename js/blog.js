@@ -70,9 +70,10 @@ var nakedBug = {
 			   }
 		 );
 		 $("#dropdown_item li").on("click",
-			  function() { 
+			  function(e) { 
 				  nakedBug.curcatalog = $(this).text();
 				  nakedBug.getPostLists(2);
+				  e.preventDefault();
 			  });
 	 },
 
