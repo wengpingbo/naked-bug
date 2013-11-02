@@ -69,9 +69,9 @@ var nakedBug = {
 				  if(data.length != 0 && data != "\n") $("#nav_item").append(data);
 			   }
 		 );
-		 $("#dropdown_item li").click(
+		 $("#dropdown_item li").on("click",
 			  function() { 
-				  nakedBug.curcatalog = $("#dropdown_item li").text();
+				  nakedBug.curcatalog = $(this).text();
 				  nakedBug.getPostLists(2);
 			  });
 	 },
