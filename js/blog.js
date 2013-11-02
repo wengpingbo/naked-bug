@@ -1,7 +1,8 @@
 var nakedBug = {
 	curpage : 0,
 	maxpage : 0,
-	//type: 0 -- previous, 1 -- next
+	curcatalog : "",
+	//type: 0 -- previous, 1 -- next, 2 -- first page
 	getPostLists : function(type) {
 		if(type == 0)
 		{
@@ -22,11 +23,18 @@ var nakedBug = {
 			  return;
 		  }
 		}
+		if(type == 2 )
+		{ 
+		  nakedBug.curpage = 0;
+		  nakedBug.maxpage = 0;
+		  //disable next button
+		  $("#previous").parent().attr("class", "disabled");
+		}
 		$.get(
 			  "utils.php",
-			  //if the len is not 20, you should pass $len value in below
+			  //if the len is not 14, you should pass $len value in below
 			  //param.
-			  {op : "alist", start : nakedBug.curpage*14},
+			  {op : "alist", start : nakedBug.curpage*14, catalog : nakedBug.curcatalog},
 			  function(data) {
 				  if(data.length == 0 || data == "\n") nakedBug.maxpage = nakedBug.curpage;
 				  else $("#post_toc").html(data);
@@ -51,14 +59,21 @@ var nakedBug = {
 		   function() {nakedBug.getPostLists(1);});
 		 //disable previous page button
 		 $("#previous").parent().attr("class", "disabled");
-		 // load first 20 posts
+		 // load first page
+		 nakedBug.getPostLists(2);
+		 // load catalog to nav
 		 $.get(
 			   "utils.php",
-			   {op : "alist", start : 0},
+			   {op : "gcatalog"},
 			   function(data) {
-				  if(data.length != 0 && data != "\n") $("#post_toc").html(data);
+				  if(data.length != 0 && data != "\n") $("#nav_item").append(data);
 			   }
 		 );
+		 $("#dropdown_item li").click(
+			  function() { 
+				  nakedBug.curcatalog = $("#dropdown_item li").text();
+				  nakedBug.getPostLists(2);
+			  });
 	 },
 
 	Initialize : function() {
