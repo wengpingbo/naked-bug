@@ -25,9 +25,9 @@ function build_catalog($path)
   if(count($catalog) < 2 ) return;
   $ret = '<li class="dropdown">';
   $ret .= '<a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;"><i class="icon-folder-open icon-white"></i> Catalog<b class="caret"></b></a>';
-  $ret .= '<ul id="dropdown_item" class="dropdown-menu pull-right">';
+  $ret .= '<ul class="dropdown-menu pull-right">';
   foreach($catalog as $value)
-	$ret .= '<li><a tabindex="-1" href="javascript:;">' . $value . '</a></li>';
+	$ret .= '<li class="dropdown_item"><a tabindex="-1" href="javascript:;">' . $value . '</a></li>';
   $ret .= '</ul></li>';
   return $ret;
 }
