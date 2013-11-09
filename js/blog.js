@@ -69,7 +69,7 @@ var nakedBug = {
 				  if(data.length != 0 && data != "\n") $("#nav_item").append(data);
 			   }
 		 );
-		 $(".dropdown_item").on("click",
+		 $("#nav_hook").on("click", ".dropdown_item", 
 			  function() { 
 				  nakedBug.curcatalog = $(this).text();
 				  nakedBug.getPostLists(2);
