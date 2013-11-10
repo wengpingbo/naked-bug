@@ -1,3 +1,1 @@
-<div class="container">
-		Created by Pingbo Wen 2013, all rights reserved. 
-</div>
+<span>Created by Pingbo Wen 2013, all rights reserved. </span>
