@@ -76,7 +76,7 @@ var nakedBug = {
 			  });
 	 },
 
-	articleIntialize : function() {
+	articleInitialize : function() {
 		//load social comment plugin
 		$.get(
 			  "utils.php",
