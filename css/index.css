@@ -1,7 +1,8 @@
-#stat {
+.stat {
 	position: absolute;
 	top:2px;
 	right: 10px;
+	display: none;
 }
 
 #post_time {

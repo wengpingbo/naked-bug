@@ -84,7 +84,7 @@ function build_post_list($path, $catalog, $start, $num)
 		$tem ='<tr><td id="post_time">' . date("Y-m-d", $posts[$postpath[$i]]);
 		$tem .= '</td><td><div id="post_title"><a href="' . $postpath[$i];
 		$tem .= '">' . basename($postpath[$i], ".html");
-		$tem .= '</a><div id="stat"><span class="badge badge-info"><i class="icon-eye-open"></i>108</span>&nbsp;&nbsp;<span class="badge"><i class="icon-comment"></i>23</span></div></div></td></tr>';
+		$tem .= '</a><div class="stat"><span class="badge badge-info"><i class="icon-eye-open"></i>108</span>&nbsp;&nbsp;<span class="badge"><i class="icon-comment"></i>23</span></div></div></td></tr>';
 		$retstr .= $tem;
 		$cout++;
 	  }
