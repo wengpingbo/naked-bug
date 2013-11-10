@@ -116,7 +116,7 @@ function getannouncementhtml()
 
 function gettopcommentihtml()
 {
-  return file_get_contents("core/topcomment.inc")
+  return file_get_contents("core/topcomment.inc");
 }
 
 /** Configure Value **/
