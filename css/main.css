@@ -13,6 +13,19 @@ tt, code, pre {
 	font-family: Monaco,Menlo,Consolas,"Courier New",monospace;
 }
 
+#article_comment {
+  margin-top: 20px;
+}
+
+#announcement {
+  margin-top: 20px;
+  background-color: #fff;
+}
+
+#top_comment {
+  margin-top:20px;
+}
+
 #stat {
 	position: absolute;
 	top:2px;
