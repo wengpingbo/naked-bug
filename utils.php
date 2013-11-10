@@ -109,6 +109,16 @@ function getcommenthtml()
   return file_get_contents("core/comment.inc");
 }
 
+function getannouncementhtml()
+{
+  return file_get_contents("core/announcement.inc");
+}
+
+function gettopcommentihtml()
+{
+  return file_get_contents("core/topcomment.inc")
+}
+
 /** Configure Value **/
 $postpath = "article";
 
@@ -132,6 +142,12 @@ $postpath = "article";
  *
  * [comment]
  * get social comment plugin
+ *
+ * [notice]
+ * get blog announcement
+ *
+ * [tcomment]
+ * get top commment plugin
  */
 // default value
 $op = "";
@@ -178,6 +194,11 @@ case "gcatalog":
 case "comment":
   echo getcommenthtml();
   break;
+case "notice":
+  echo getannouncementhtml();
+  break;
+case "tcomment":
+  echo gettopcommenthtml();
 default:
   echo "";
 }

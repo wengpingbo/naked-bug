@@ -73,7 +73,23 @@ var nakedBug = {
 			  function() { 
 				  nakedBug.curcatalog = $(this).text();
 				  nakedBug.getPostLists(2);
-			  });
+		 });
+		 // load top comment plugin
+		 $.get(
+			   "utils.php",
+			   {op : "tcomment"},
+			   function(data) {
+				   $("#top_comment").html(data);
+			   }
+		 );
+		 // load announcement
+		 $.get(
+			   "utils.php",
+			   {op : "notice"},
+			   function(data) {
+				   $("#announcement").html(data);
+			   }
+		 );
 	 },
 
 	articleInitialize : function() {
