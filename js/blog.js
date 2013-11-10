@@ -101,7 +101,7 @@ var nakedBug = {
 				"utils.php",
 				{op : "footer"},
 				function(data) {
-				  $("#footer_hook").append(data);
+				  $("#footer_text").append(data);
 				}
 		  );
 		//check current page type, index or article
