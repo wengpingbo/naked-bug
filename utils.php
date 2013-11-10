@@ -114,7 +114,7 @@ function getannouncementhtml()
   return file_get_contents("core/announcement.inc");
 }
 
-function gettopcommentihtml()
+function gettopcommenthtml()
 {
   return file_get_contents("core/topcomment.inc");
 }
