@@ -28,6 +28,10 @@ tt, code, pre {
   margin-top:20px;
 }
 
+#footer_hook {
+  margin-top: 5px;
+}
+
 #stat {
 	position: absolute;
 	top:2px;
