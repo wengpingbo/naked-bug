@@ -104,6 +104,11 @@ function getfooterhtml()
   return file_get_contents("core/footer.inc");
 }
 
+function getcommenthtml()
+{
+  return file_get_contents("core/comment.inc");
+}
+
 /** Configure Value **/
 $postpath = "article";
 
@@ -124,6 +129,9 @@ $postpath = "article";
  *
  * [gcatalog]
  * get article catalog
+ *
+ * [comment]
+ * get social comment plugin
  */
 // default value
 $op = "";
@@ -166,6 +174,9 @@ case "footer":
   break;
 case "gcatalog":
   echo build_catalog($postpath);
+  break;
+case "comment":
+  echo getcommenthtml();
   break;
 default:
   echo "";

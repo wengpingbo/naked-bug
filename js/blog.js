@@ -76,6 +76,17 @@ var nakedBug = {
 			  });
 	 },
 
+	articleIntialize : function() {
+		//load social comment plugin
+		$.get(
+			  "utils.php",
+			  {op : "comment"},
+			  function(data) {
+				  $("#article_comment").html(data);
+			  }
+		);
+	},
+
 	Initialize : function() {
 		 //load top nav
 		 $.get(
@@ -96,7 +107,8 @@ var nakedBug = {
 		//check current page type, index or article
 		var pagetype = $("body").data("pagetype");
 		if(pagetype == "index") nakedBug.indexInitialize();
+		else nakedBug.articleInitialize();
 	  }
 };
 
-nakedBug.Initialize();
+$(nakedBug.Initialize());
