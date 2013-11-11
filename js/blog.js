@@ -2,6 +2,7 @@ var nakedBug = {
 	curpage : 0,
 	maxpage : 0,
 	curcatalog : "",
+	baseurl : "",
 	//type: 0 -- previous, 1 -- next, 2 -- first page
 	getPostLists : function(type) {
 		if(type == 0)
@@ -31,7 +32,7 @@ var nakedBug = {
 		  $("#previous").parent().attr("class", "disabled");
 		}
 		$.get(
-			  "utils.php",
+			  nakedBug.baseurl,
 			  //if the len is not 14, you should pass $len value in below
 			  //param.
 			  {op : "alist", start : nakedBug.curpage*14, catalog : nakedBug.curcatalog},
@@ -52,6 +53,14 @@ var nakedBug = {
 		}
 	},
 
+	getbaseurl : function() {
+		pathArray = window.location.href.split('/');
+		url = "";
+		for(var i=0; i < pathArray.length-4; i++)
+		  url += pathArray[i]; 
+		return url;
+	},
+
 	indexInitialize : function() {
 		 $("#previous").click( 
 		   function() {nakedBug.getPostLists(0);});
@@ -63,7 +72,7 @@ var nakedBug = {
 		 nakedBug.getPostLists(2);
 		 // load catalog to nav
 		 $.get(
-			   "utils.php",
+			   nakedBug.baseurl,
 			   {op : "gcatalog"},
 			   function(data) {
 				  if(data.length != 0 && data != "\n") $("#nav_item").append(data);
@@ -76,7 +85,7 @@ var nakedBug = {
 		 });
 		 // load top comment plugin
 		 $.get(
-			   "utils.php",
+			   nakedBug.baseurl,
 			   {op : "tcomment"},
 			   function(data) {
 				   $("#top_comment").html(data);
@@ -84,7 +93,7 @@ var nakedBug = {
 		 );
 		 // load announcement
 		 $.get(
-			   "utils.php",
+			   nakedBug.baseurl,
 			   {op : "notice"},
 			   function(data) {
 				   $("#announcement").html(data);
@@ -95,7 +104,7 @@ var nakedBug = {
 	articleInitialize : function() {
 		//load social comment plugin
 		$.get(
-			  "utils.php",
+			  nakedBug.baseurl,
 			  {op : "comment"},
 			  function(data) {
 				  $("#article_comment").html(data);
@@ -104,9 +113,10 @@ var nakedBug = {
 	},
 
 	Initialize : function() {
+		 nakedBug.baseurl = nakedBug.getbaseurl();
 		 //load top nav
 		 $.get(
-				"utils.php",
+				nakedBug.baseurl,
 				{op : "gnav"},
 				function(data) {
 				  $("#nav_hook").append(data);
@@ -114,7 +124,7 @@ var nakedBug = {
 		  );
 		  //load footer
 		  $.get(
-				"utils.php",
+				nakedBug.baseurl,
 				{op : "footer"},
 				function(data) {
 				  $("#footer_text").append(data);
