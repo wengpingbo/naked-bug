@@ -57,7 +57,7 @@ var nakedBug = {
 		pathArray = window.location.href.split('/');
 		url = "";
 		for(var i=0; i < pathArray.length-4; i++)
-		  url += pathArray[i]; 
+		  url += pathArray[i] + '/'; 
 		return url;
 	},
 
