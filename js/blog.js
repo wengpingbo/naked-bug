@@ -55,7 +55,7 @@ var nakedBug = {
 
 	getbaseurl : function() {
 		pathArray = window.location.href.split('/');
-		if(pagetype == "index") return window.location.href;
+		if($("body").data("pagetype") == "index") return window.location.href;
 		url = "";
 		for(var i=0; i < pathArray.length-4; i++)
 		  url += pathArray[i] + '/'; 
