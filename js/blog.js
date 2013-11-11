@@ -114,7 +114,7 @@ var nakedBug = {
 	},
 
 	Initialize : function() {
-		 nakedBug.baseurl = nakedBug.getbaseurl();
+		 nakedBug.baseurl = nakedBug.getbaseurl() + "/utils.php";
 		 //load top nav
 		 $.get(
 				nakedBug.baseurl,
