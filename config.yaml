@@ -8,7 +8,7 @@
 blogtitle: "Pingbo Wen's Blog"
 
 # must add protocol before the url
-blogurl: "http://202.201.0.164/blog"
+blogroot: "http://202.201.0.164/blog"
 
 # your posts location, each post should have a separated dir
 # eg. 
@@ -30,9 +30,9 @@ blogurl: "http://202.201.0.164/blog"
 # http://getbootstrap.com/2.3.2/base-css.html#icons
 nav_items: 
     Project: 
-        icon: test
+        icon: th
         url: "#"
     About me: 
-        icon: tesst
+        icon: user
         url: "#"
 ...
