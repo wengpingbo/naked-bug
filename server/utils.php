@@ -33,7 +33,24 @@ function build_catalog($path)
 }
 
 /**
+ * return a string of a list item title from post
+ * NOTICE: the list title must in FIRST LINE
+ */
+function get_post_list_title($post)
+{
+  $fp = fopen($post, "r");
+  $line = fgets($fp);
+  fclose($fp);
+  $line = mb_substr($line, 4);
+  $len = mb_strlen($line);
+  $line = mb_substr($line, 0, $len - 3);
+  return $line;
+}
+
+/**
  * return a array contain post list
+ * array structure: 
+ * {"post path" => {"mtime", "list item title"}}
  */
 function get_post_list($path)
 {
@@ -49,8 +66,11 @@ function get_post_list($path)
 			if($post != "." && $post != ".." && is_dir("$path/$value/$post"))
 			{
 			  $article=glob("$path/$value/$post/*.html");
-			  if(count($article) >=1 ) 
-				$ret[$article[0]] = filemtime($article[0]);
+			  if(count($article) >=1 )
+			  {
+				$ret[$article[0]][0] = filemtime($article[0]);
+				$ret[$article[0]][1] = get_post_list_title($article[0]);
+			  }
 			}
 		  }
 		}
@@ -81,9 +101,9 @@ function build_post_list($path, $catalog, $start, $num)
 	  $pos = strpos($postpath[$i], "$path/$catalog");
 	  if($pos !== false && $pos == 0)
 	  {
-		$tem ='<tr><td id="post_time">' . date("Y-m-d", $posts[$postpath[$i]]);
+		$tem ='<tr><td id="post_time">' . date("Y-m-d", $posts[$postpath[$i]][0]);
 		$tem .= '</td><td><div id="post_title"><a href="' . $postpath[$i];
-		$tem .= '">' . basename($postpath[$i], ".html");
+		$tem .= '">' . $posts[$postpath[$i]][1];
 		$tem .= '</a><div class="stat"><span class="badge badge-info"><i class="icon-eye-open"></i>108</span>&nbsp;&nbsp;<span class="badge"><i class="icon-comment"></i>23</span></div></div></td></tr>';
 		$retstr .= $tem;
 		$cout++;
