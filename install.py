@@ -6,10 +6,10 @@ import sys
 import re
 from bs4 import BeautifulSoup
 
-config_file = "config.yaml"
-asciidoc_backend = "asciidoc/simple.conf"
-index_page = "index.html"
-nav_bar = "core/nav.inc"
+config_file = "local/config.yaml"
+asciidoc_backend = "local/asciidoc/simple.conf"
+index_page = "server/index.html"
+nav_bar = "server/core/nav.inc"
 
 if not os.path.exists(config_file):
   sys.stderr.write("Error, file " + config_file + "not found\n")
@@ -53,7 +53,7 @@ for item in config_data["nav_items"]:
   key = str(item)
   value = config_data["nav_items"][key]
   nav_a = nav_soup.new_tag("a")
-  nav_a["href"] = value["url"]
+  nav_a["href"] = config_data["blogroot"] + "/" + value["url"]
   nav_a_icon = nav_soup.new_tag("i")
   nav_a_icon["class"] = "icon-" + value["icon"] + " icon-white"
   nav_a_str = nav_soup.new_string(key)
