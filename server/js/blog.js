@@ -54,10 +54,10 @@ var nakedBug = {
 	},
 
 	getbaseurl : function() {
-		pathArray = window.location.href.split('/');
-		if($("body").data("pagetype") == "index") return window.location.href;
+		//get blog.js server path url
+		pathArray = $("[src$='blog.js']").attr("src").split('/');
 		url = "";
-		for(var i=0; i < pathArray.length-4; i++)
+		for(var i=0; i < pathArray.length-2; i++)
 		  url += pathArray[i] + '/'; 
 		return url;
 	},

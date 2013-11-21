@@ -26,20 +26,6 @@
       About me
      </a>
     </li>
-    <li>
-     <a href="http://202.201.0.164/blog/#">
-      <i class="icon-th icon-white">
-      </i>
-      Project
-     </a>
-    </li>
-    <li>
-     <a href="http://202.201.0.164/blog/#">
-      <i class="icon-user icon-white">
-      </i>
-      About me
-     </a>
-    </li>
    </ul>
    <form action="" class="navbar-search pull-right">
     <input class="search-query span2" placeholder="Google Search" type="text">
