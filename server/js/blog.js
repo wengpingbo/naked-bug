@@ -56,6 +56,7 @@ var nakedBug = {
 	getbaseurl : function() {
 		//get blog.js server path url
 		pathArray = $("[src$='blog.js']").attr("src").split('/');
+		if($("body").data("pagetype") == "index") return window.location.href;
 		url = "";
 		for(var i=0; i < pathArray.length-2; i++)
 		  url += pathArray[i] + '/'; 
@@ -114,7 +115,7 @@ var nakedBug = {
 	},
 
 	Initialize : function() {
-		 nakedBug.baseurl = nakedBug.getbaseurl() + "/utils.php";
+		 nakedBug.baseurl = nakedBug.getbaseurl() + "utils.php";
 		 //load top nav
 		 $.get(
 				nakedBug.baseurl,

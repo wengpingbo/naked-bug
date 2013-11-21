@@ -43,7 +43,7 @@ function get_post_list_title($post)
   fclose($fp);
   $line = mb_substr($line, 4);
   $len = mb_strlen($line);
-  $line = mb_substr($line, 0, $len - 3);
+  $line = mb_substr($line, 0, $len - 4);
   return $line;
 }
 
