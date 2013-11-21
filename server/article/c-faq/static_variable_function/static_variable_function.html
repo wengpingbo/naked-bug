@@ -1,0 +1,85 @@
+<!--1.10-静态变量与静态函数的声明与定义-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>1.10-静态变量与静态函数的声明与定义 - Pingbo Wen's Blog</title>
+<link href="http://202.201.0.164/blog/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="http://202.201.0.164/blog/css/global.css" rel="stylesheet">
+<link href="http://202.201.0.164/blog/css/article.css" rel="stylesheet">
+
+
+<script type="text/javascript" src="http://202.201.0.164/blog/js/asciidoc.js"></script>
+
+
+
+</head>
+<body class="article" data-spy="scroll" data-target="#article_nav">
+<div id="nav_hook">
+          <noscript>
+                <p><b>JavaScript must be enabled in your browser
+                  to display nav bar contents.</b></p></noscript>
+</div>
+<div id="header_bg" class="container-fluid">
+<div id="header" class="container">
+<h1>1.10-静态变量与静态函数的声明与定义</h1>
+<span id="author">WEN Pingbo</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:wengpingbo@gmail.com">wengpingbo@gmail.com</a>&gt;</span><br>
+</div>
+</div>
+
+<div class="container">
+<div class="row-fluid" id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph"><p>对于一个静态变量或者静态函数，是不是每一处声明的地方，都需要包含static关键字呢？</p></div>
+<div class="paragraph"><p>事实上，编译器对变量和函数的处理是不同的。对于变量，如果你要声明一个静态变量，那么在第一次声明的时候，就必须要加上static关键字，且之后的所有的声明都必须加上static关键字，否则编译器会报错。例子如下：</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.4
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">int</span> v1<span style="color: #990000">;</span>
+<span style="font-weight: bold"><span style="color: #0000FF">static</span></span> <span style="color: #009900">int</span> v2<span style="color: #990000">;</span>
+<span style="font-weight: bold"><span style="color: #0000FF">static</span></span> <span style="color: #009900">int</span> v3<span style="color: #990000">;</span>
+<span style="font-weight: bold"><span style="color: #0000FF">static</span></span> <span style="color: #009900">int</span> v1<span style="color: #990000">;</span>
+<span style="color: #009900">int</span> v2<span style="color: #990000">;</span>
+<span style="font-weight: bold"><span style="color: #0000FF">extern</span></span> <span style="color: #009900">int</span> v3<span style="color: #990000">;</span></tt></pre></div></div>
+<div class="paragraph"><p>这个例子中，只有v3是正确的，v1和v2都会出现“静态声明在非静态声明之后”的错误。所以以后在写静态变量的声明和定义的时候，最好都加上static关键字。</p></div>
+<div class="paragraph"><p>那么，编译器对静态函数的处理，是否也是这样的呢？答案是否定的，我们再写一个例子：</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.4
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">f1</span></span><span style="color: #990000">();</span>
+<span style="font-weight: bold"><span style="color: #0000FF">static</span></span> <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">f2</span></span><span style="color: #990000">();</span>
+<span style="font-weight: bold"><span style="color: #0000FF">static</span></span> <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">f3</span></span><span style="color: #990000">();</span>
+<span style="font-weight: bold"><span style="color: #0000FF">static</span></span> <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">f1</span></span><span style="color: #990000">();</span>
+<span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">f2</span></span><span style="color: #990000">();</span>
+<span style="font-weight: bold"><span style="color: #0000FF">extern</span></span> <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">f3</span></span><span style="color: #990000">();</span></tt></pre></div></div>
+<div class="paragraph"><p>可能你会以为这次，编译器会报f1和f2的错误，其实只有f1的声明是错误的，f2通过了编译。</p></div>
+<div class="paragraph"><p>从这，可以看出，静态函数的声明，只要保证第一次的声明加上了正确的static关键字，其后的声明可以不加，这是和静态变量的声明不同的地方。</p></div>
+<div class="paragraph"><p>总结起来，静态函数/变量的声明，在第一次声明是必须要加上static关键字的，而在之后的声明，函数可以不加，变量必须加。但是建议以后编码的时候，还是保持所有的声明和定义的一致性，有利于代码阅读。</p></div>
+</div>
+</div>
+<div id="footnotes" class="span9 pull-right"><hr></div>
+<div id="article_comment" class="span9 pull-right"></div>
+</div> <!-- row-fluid -->
+</div> <!-- container -->
+
+<div id="footer_hook" class="container">
+<div id="footer_text" class="pull-right">
+Last updated 2013-11-21 23:25:41 CST
+<br />
+</div>
+</div>
+<script src="http://code.jquery.com/jquery.js"></script>
+<script src="http://202.201.0.164/blog/js/bootstrap.min.js"></script>
+<script src="http://202.201.0.164/blog/js/blog.js"></script>
+</body>
+</html>
