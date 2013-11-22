@@ -54,11 +54,9 @@ div.content + div.title {
 }
 
 div.sidebarblock > div.content {
-  border-left: 4px solid #f0f0f0;
 }
 
 div.listingblock > div.content {
-  border-left: 5px solid #f0f0f0;
 }
 
 div.quoteblock, div.verseblock {
