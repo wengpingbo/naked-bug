@@ -31,6 +31,15 @@ body {
   font-style: italic;
 }
 
+.small_toc {
+	padding-left: 30px;
+}
+
+.small_toc > ul > li {
+	font-size: 16px;
+	line-height: 25px;
+}
+
 .bs-docs-sidenav {
   width: 228px;
   padding: 0;
