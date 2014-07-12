@@ -1,3 +1,11 @@
+body {
+	padding-top: 40px;
+}
+
+#footer_hook {
+	margin-top: 5px;
+}
+
 #article_comment {
   margin-top: 20px;
 }
@@ -8,19 +16,19 @@
   background: url('../img/bg.gif') repeat-x;
 }
 
-#header {
+#header h1 {
+  margin-top: 40px;
   color: white;
 }
 
-#header h1 {
-  margin-top: 40px;
+#author {
+	margin-left: 30px;
 }
 
 #header span {
   font-size: 16px;
   font-weight: bold;
   font-style: italic;
-  margin-left: 30px;
 }
 
 .bs-docs-sidenav {
@@ -34,24 +42,32 @@
      -moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
           box-shadow: 0 1px 4px rgba(0,0,0,.065);
 }
-.bs-docs-sidenav > li > a {
+.bs-docs-sidenav > ul > li > a {
   display: block;
   width: 190px \9;
+  white-space: nowrap;
+  overflow-x: hidden;
   margin: 0 0 -1px;
   padding: 8px 14px;
   border: 1px solid #e5e5e5;
+  text-decoration: none;
 }
-.bs-docs-sidenav > li:first-child > a {
+.bs-docs-sidenav > ul > li:first-child > a {
   -webkit-border-radius: 6px 6px 0 0;
      -moz-border-radius: 6px 6px 0 0;
           border-radius: 6px 6px 0 0;
 }
-.bs-docs-sidenav > li:last-child > a {
+.bs-docs-sidenav > ul > li:last-child > a {
   -webkit-border-radius: 0 0 6px 6px;
      -moz-border-radius: 0 0 6px 6px;
           border-radius: 0 0 6px 6px;
 }
-.bs-docs-sidenav > .active > a {
+.bs-docs-sidenav > ul > .active {
+	background-color: #08c;
+}
+
+.bs-docs-sidenav > ul > .active > a {
+	color: #fff;
   position: relative;
   z-index: 2;
   padding: 9px 15px;
@@ -68,9 +84,6 @@
   margin-right: -6px;
   opacity: .25;
 }
-.bs-docs-sidenav > li > a:hover {
-  background-color: #f5f5f5;
-}
 .bs-docs-sidenav a:hover .icon-chevron-right {
   opacity: .5;
 }
@@ -80,7 +93,7 @@
   opacity: 1;
 }
 .affix {
-  top: 50px;
+  top: 25px;
 }
 .bs-docs-sidenav.affix-bottom {
   position: absolute;

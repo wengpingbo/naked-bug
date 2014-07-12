@@ -6,7 +6,7 @@
    </a>
    <ul class="nav" id="nav_item">
     <li>
-     <a class="active" href="http://202.201.0.164/blog">
+     <a class="active" href="http://192.168.1.106/blog">
       <i class="icon-home icon-white">
       </i>
       Home
