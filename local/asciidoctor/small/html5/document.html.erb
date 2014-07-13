@@ -1,6 +1,6 @@
 <%
 	require 'yaml'
-	blog_config = YAML::load_file(File.join(File.dirname(File.expand_path(__FILE__)), 'config.yaml'))
+	blog_config = YAML::load_file(File.join(File.dirname(File.expand_path(__FILE__)), '../../../config.yaml'))
 	blog_title = blog_config['blogtitle']
 %>
 <!--<%= doctitle(:sanitize => true) || (attr 'untitled-label') %>-->
