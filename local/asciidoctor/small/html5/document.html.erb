@@ -26,7 +26,7 @@ end %>
   end
 elsif attr? :stylesheet
   if @safe >= Asciidoctor::SafeMode::SECURE || (attr? :linkcss) %>
-<link rel="stylesheet" href="<%= normalize_web_path((attr :stylesheet), attr(:stylesdir, '')) %>"><%
+<link rel="stylesheet" href="<%=blog_config['blogroot']%>/css/asciidoctor.css"><%
   else %>
 <style>
 <%= read_asset normalize_system_path((attr :stylesheet), (attr :stylesdir, '')), true %>
@@ -34,7 +34,7 @@ elsif attr? :stylesheet
   end
 end
 %>
-<link href="css/article.css" rel="stylesheet">
+<link href="<%=blog_config['blogroot']%>/css/article.css" rel="stylesheet">
 <%if attr? :icons, 'font'
   if !(attr 'iconfont-remote', '').nil? %>
 <link rel="stylesheet" href="<%= attr 'iconfont-cdn', 'http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css' %>"><%
