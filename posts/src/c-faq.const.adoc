@@ -1,0 +1,43 @@
+= 11.8-const
+WEN Pingbo <wengpingbo AT gmail.com>
+Aug 13 2013
+
+const关键字用来修饰一个对象，使其成为一个只读对象。比如：
+
+[source, c]
+const int n=10;
+
+但是const所修饰的对象并不等于一个常量表达式。const修饰的对象是一个运行时对象，而一个常量表达式是一个编译时对象。所以这也可以用来解释为什么用const修饰的整数来初始化一个数组是不行的。比如:
+
+[source, c]
+int a[n]; //error
+
+const总是修饰离它最近的对象，比如：
+
+[source, c]
+----
+const char *p;
+char const *p;
+char * const p;
+----
+
+第一个和第二个是一样的，因为const修饰的是char和*，都表示指针p指向的是一个只读字符，但是对于p本身，确是可以被改变的。而第3个const修饰的是指针p本身，表示指针p是一个只读的对象，但是对于p所指向的字符，是可修改的。
+这和复杂指针声明是一样的，都是依靠操作符的结合性来判断const是修饰那个对象的。
+
+而当你用const修饰一个自定义类型的时候，和普通类型是没有区别的。比如：
+
+[source, c]
+----
+#define x_ptr int *
+typedef y_ptr int *;
+----
+
+当你进行如下声明的时候：
+
+[source, c]
+----
+const x_ptr x;
+const y_ptr y;
+----
+
+这时候，第一个const修饰的是x所指向的整数，因为x_ptr只是一个宏，并不是一个类型，宏是在编译时就确定的，所以第一个声明和”const int *x;“是一样。但是第二个const修饰的却是y，而不是y所指向的整数，因为y_ptr是一个用户自定义类型。这就像你在声明基本类型变量的时候：const int y一样，const修饰的是y。

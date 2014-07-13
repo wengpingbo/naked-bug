@@ -1,0 +1,19 @@
+= 1.11-extern对函数声明的作用
+WEN Pingbo <wengpingbo@gmail.com>
+Jul 20 2013
+
+extern对函数声明是否有意义？
+
+答案是没有意义，事实上，在函数声明前加上extern，只是提醒你，这个函数的定义在另外一个源文件中，除此之外，没有其他意义。也就是说：
+
+[source, c]
+extern int f();
+
+和
+
+[source, c]
+int f();
+
+没有任何区别。
+
+其实，extern只对变量声明有意义。

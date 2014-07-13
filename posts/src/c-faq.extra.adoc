@@ -1,0 +1,87 @@
+= 番外-scope, linkage and storage class
+WEN Pingbo <wengpingbo@gmail.com>
+Jul 22 2013
+
+在看c-faq，和c或者c++的RFC的时候，经常见到一些scope, linkage和storage class的字眼，让人摸不着头脑！这些概念，都是用来描述一个标识符（identifier）的，比如：变量标识符，函数标识符。下面就这些概念做一些说明：
+
+== scope
+scope，字面意思就是范围。IBM对C和C++语言的定义文档中 footnote:[http://publib.boulder.ibm.com/infocenter/macxhelp/v6v81/index.jsp] ，对scope是这样描述的：
+
+[quote]
+____
+The scope of an identifier is the largest region of the program text in which the identifier can potentially be used to refer to its object. In C++, the object being referred to must be unique. However, the name to access the object, the identifier itself, can be reused. The meaning of the identifier depends upon the context in which the identifier is used. Scope is the general context used to distinguish the meanings of names.
+____
+
+意思就是，标识符的scope是在程序上下文中，用来确定，该标识符是对应与哪个object的。其实说白了，就是在程序中，一个变量只能有一个定义，但可以有多个声明，那么每个声明是对应与那个具体的变量的呢？ 就是靠scope来确定。
+
+在C和C++语言中，有多种scope，具体如下：
+
+|===
+|C | C++
+
+|block | local
+
+|function | function
+
+|function prototype | function prototype
+
+|file (global) | global namespace
+
+| | namespace
+
+| | class
+|===
+
+举个例子：
+
+[source, c]
+----
+int x; //file scope
+int f()
+{
+	int x=10; //block scope
+}
+----
+
+== linkage
+
+刚才的scope，只是在一个文件中，或者说一个translation unit中来确定每个标识符与object之间的对应关系。但是如果在两个文件中，有相同的标识符，那又怎么确定呢？
+
+那就需要linkage这个属性，来确定。IBM中的C和C++语言规范是这样来定义linkage的：
+
+[quote]
+____
+Linkage determines whether identifiers that have identical names refer to the same object, function, or other entity, even if those identifiers appear in different translation units. The linkage of an identifier depends on how it was declared. There are three types of linkages: external, internal, and no linkage.
+____
+
+从上可以看出，有3中linkage：external, internal和no linkage
+
+有external linkage的标识符，对于其他编译单元是可见的，就相当于那些extern的全局变量之类的。
+
+有internal linkage的标识符，只能在当前编译单元可见，也就是只能在当前文件中被引用。
+
+no linkage的标识符，那它可见的范围就由它的scope属性决定了。
+
+== storage class
+
+可能上面讲的那个linkage，你还有点疑惑：怎样来确定一个identifier的linkage呢？
+
+这就要靠storage class关键字了。在ISO/IEC 9899:201x中，对storage class关键字定义如下：
+
+* storage-class-specifier:
+* typedef
+* extern
+* static
+* _Thread_local
+* auto
+* register
+
+____
+这个地方，typedef虽然是storage class，这只是在语法上的考虑，因为typedef和其他关键字的语法相同，但并不能决定一个identifier的属性。
+____
+
+是不是很熟悉？其实对于一个变量，它的默认存储周期，范围和linkage属性，是由该变量声明的位置决定的：是在一个block中声明的，还是在函数外声明的。你也可以用storage class的关键字对变量进行显示的声明，来决定它的属性。
+
+对于一个函数，它可用的storage class只有extern和static。
+
+更多关于这一方面的问题，可以看这里： http://www.prismnet.com/~mcmahon/Notes/attributes.html[Identifier Scope, Storage Class, and Linkage]

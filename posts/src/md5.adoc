@@ -1,0 +1,51 @@
+= MD5算法实现
+WEN Pingbo <wengpingbo AT gmail.com>
+Dec 08 2012
+
+md5算法的标准文件见 http://www.ietf.org/rfc/rfc1321.txt[RFC1321]。这里说一下具体实现时，应该注意的地方。
+
+== LSB和MSB
+其实，在官方文档中已经提到过这个，但是没注意，现把它摘抄如下：
+
+[quote]
+____
+In this document a "word" is a 32-bit quantity and a "byte" is an eight-bit quantity. A sequence of bits can be interpreted in a natural manner as a sequence of bytes, where each consecutive group of eight bits is interpreted as a byte with the high-order (most significant) bit of each byte listed first. Similarly, a sequence of bytes can be interpreted as a sequence of 32-bit words, where each consecutive group of four bytes is interpreted as a word with the low-order (least significant) byte given first.
+____
+
+翻译过来，就是说在md5算法中一个字节内是按MSB存储的，在一个字内是按LSB存储的。
+
+例如：
+
+[source]
+00010111 11011001 11100011 10101100(msb)
+
+按照文档中的规定，每个字节是按MSB存储的，则写成十六进制如下：
+
+[source]
+0x17 d9 e3 ac
+
+而在一个字，即32位里，是按高字节序存储的，所以最终的存储值如下：
+
+[source]
+0xace3d917
+
+另外，在填充长度时，两个字也是按LSB存储，每个字内是按上面所说的存储，具体原文如下：
+
+[quote]
+____
+A 64-bit representation of b (the length of the message before the padding bits were added) is appended to the result of the previous step. In the unlikely event that b is greater than 2^64, then only the low-order 64 bits of b are used. (These bits are appended as two 32-bit words and appended low-order word first in accordance with the previous conventions.)
+____
+
+虽然官方文档规定了数据该怎样存储，但是在真正实现时，就连官方给的DEMO也没有完全遵守。以至于自己实现md5算法时，算出来的结果总是不对。
+
+== md5实现步骤
+
+分割输入数据，填充数据和长度:: 在这一步，原生的数据和填充的数据（0x80 00 00 ...）是按高字节序存储的。而填充的长度须按上面所说的规定存储，即字节内MSB，字内LSB，双字LSB。
+
+初始化4字缓存:: 文档中写的是按LSB存储，但是真正初始化是却是按MSB存储的。
+
+4*16迭代:: 在迭代中，传进来的X[i]是需要进行LSB转换的，也就是把原来存储的MSB数据转换成LSB（第一步是原生数据加填充数据（MSB）+长度填充（LSB），现在需要把全部数据再次进行LSB转换，长度填充相当于转换了两次）
+
+输出结果:: 输出的结构，需要进行LSB转换，就是把4字缓存中每个字进行LSB转换，然后输出的结果才是正确的。
+
+要注意T表的计算，虽然文档中给出了具体的计算公式(2^32*abs(sin(i)))，但是还是建议直接通过一个数组预先给出，因为这个计算如果处理的不好，会有精度误差，导致最后结果错误，并且这个还与系统类型，编译器版本，CPU类型和所用语言有关。我想这也是官方的DEMO为了程序的可移植性和稳定性，采用的也是预先给出T表值，而没有现用现算的原因吧。像这次实现MD5，有一个人用Java实现的，结果没有碰到这个问题，而我用C语言实现，这个问题就出现了。

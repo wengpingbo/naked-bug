@@ -1,0 +1,74 @@
+= 在linux下利用Google的SMTP来发邮件
+WEN Pingbo <wengpingbo AT gmail.com>
+Mar 18 2013
+
+在维护服务器的时候，经常需要建立一个服务器错误预警系统，而邮件是一个很好的途径。
+
+在linux下，一般是通过mail来写邮件，而传递默认使用sendmail服务。这样虽然能向外界发送邮件，但邮件不能回复，并且sendmail服务要求发送方是系统可识别用户，配置比较麻烦。下面通过使用Google的SMTP服务器来发送邮件，不但减轻服务器负担，而且可以使用类似的公共邮件地址来作为发送方。
+
+下面所有步骤，全部基于CentOS 6.3，其他发行版本类似。
+
+== 安装mail
+
+[source, sh]
+yum install mailx -y
+
+如果想直接使用sendmail来发送邮件，需要启动sendmail服务，或者saslauthd服务
+
+== 配置SMTP
+如果想利用外部SMTP发送邮件，需编辑/etc/mail.rc，加入以下内容
+
+[source, sh]
+----
+set from=demo@qq.com 
+set smtp=smtp.qq.com  
+set smtp-auth-user=demo 
+set smtp-auth-password=demopass 
+set smtp-auth=login
+----
+
+但是这个设置只适合那些支持非ssl链接的SMTP服务器，但对于想Google这样，强制使用SSL加密连接的，需要加入SSL支持。
+
+== 加入SSL支持
+
+在裝有 Firefox 的 Linux 电脑, 將\~/.mozilla/firefox/xxxxxxxx.default/ 的 cert*.db 与 key*.db 复制到 ~/.mozilla_nss_shared_db
+
+编辑/etc/mail.rc，加入以下内容
+
+[source, sh]
+----
+set ssl-verify=ignore
+set nss-config-dir=~/.mozilla_nss_shared_db
+set from="myaccount@gmail.com(myname)"
+set smtp=smtps://smtp.gmail.com:465
+set smtp-auth=login
+set smtp-auth-user=myaccount
+set smtp-auth-password=mysecret
+----
+
+如果想添加多个帐号，那就这样写配置文件
+
+[source, sh]
+----
+account starttls {
+	set smtp-use-starttls
+	set ssl-verify=ignore
+	set nss-config-dir=~/.mozilla_nss_shared_db
+	set from="myaccount@my.smtp.host(myname)"
+	set smtp=smtp://my.smtp.host:25
+	set smtp-auth=login
+	set smtp-auth-user=myaccount
+	set smtp-auth-password=mysecret
+}
+account gmail {
+	set ssl-verify=ignore
+	set nss-config-dir=~/.mozilla_nss_shared_db
+	set from="myaccount@gmail.com(myname)"
+	set smtp=smtps://smtp.gmail.com:465
+	set smtp-auth=login
+	set smtp-auth-user=myaccount
+	set smtp-auth-password=mysecret
+}
+----
+
+不过在发送邮件的时候，需要用-A参数指定发送帐号，比如-A gmail。

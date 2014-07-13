@@ -1,0 +1,80 @@
+= android反编译破解
+WEN Pingbo <wengpingbo AT gmail.com>
+May 20 2013
+
+这里以"魔塔50层"这个游戏为例子，讲解一下android下面反编译的过程。
+
+== 准备
+
+首先下载目标apk，我是从这里下载的： http://www.wandoujia.com/apps/com.ss.magicTower[com.ss.magicTower]。
+
+在准备好android开发环境后，需要下载如下工具:
+
+https://code.google.com/p/android-apktool/[apktool]:: 把apk文件反编译成dalvik中间码，smali
+http://java.decompiler.free.fr/?q=jdgui[jd-gui]:: 查看jar源码文件
+https://code.google.com/p/dex2jar/[dex2jar]:: 把dex转换成jar
+
+== 原理
+
+首先把apk文件解压缩，然后提取其中的.dex文件，用dex2jar把dex文件转成jar文件，这样就可以用jd-gui打开jar文件，查看具体的java源码了。然后定位要修改的地方，再用apktool把apk文件转换成dalvik的中间码，定位到之前要修改的位置，然后修改保存，再用apktool重新打包成apk文件。最后一步，用jarsigner给前面生成的apk文件签名，这样就可以把咱重新制作的apk安装到android系统上了。
+
+== 过程
+
+解压apk文件，可以用rar或者7zip，都行。
+
+转换成jar：
+
+[source, bat]
+dex2jar.bat classes.dex
+
+这一步后，就会在当前目录下生成一个classes_dex2jar.jar文件。
+
+用jd-gui打开，并定位。一般的程序都会用proguard来进行代码混淆，所以你这里看到的都是一些稀奇古怪的变量名，类名和方法名，这对定位会造成影响。但是花点时间，还是能够找出来的。 http://proguard.sourceforge.net[proguard]现在已经默认加到了android sdk里，在sdk/tools/proguard里。在程序开发中，如果你希望用proguard来混淆自己的代码，只需在default.properties里添加一句"proguardproguard.config=proguard.cfg"，就可以启用proguard。
+
+apktool反编译：
+
+[source, bat]
+apktool.bat d mota50.apk mota50
+
+命令完成后，会生成一个mota50的文件夹，定位到smali\com\ss\magicTower\k.smali文件，用文本编辑器打开它。然后修改相应的位置。我这里就是修改了判断条件那个地方，把if(a.h>180)改成if(a.h>-180)，这样就永真了，所以就跳过验证了。
+
+android用的是dalvik VM的中间码，与pc端的java中间码不同，smali文件就是dalvik的中间码，你可以理解为汇编语言，具体关于dalvik中间码定义，可以看这里 http://source.android.com/tech/dalvik/dalvik-bytecode.html[dalvik-bytecode]。
+
+修改完之后，需要重新打包成apk文件：
+
+[source, bat]
+apktool.bat b mota50
+
+这个命令，会在mota50文件夹中生成build和dist，两个文件夹，apk文件存放在dist。你也可以用这个命令：
+
+[source, bat]
+apktool.bak b -f mota50 newmota.apk
+
+这个命令会在当前目录生成一个apk文件。
+
+这样生成的apk文件并不带签名，而在android中，不带签名的文件，是无法安装的。所以我们需要给它重新添加签名。
+签名需要密钥，可是我们手上没有，需要自己生成一个，命令如下：
+
+[source, bat]
+keytool -genkey -v -keystore magic.keystore -alias magic.keystore -keyalg RSA -keysize 2048 -validity 10000 <1>
+
+<1> -keystore和-alias参数后面跟的名字一定要一样，否则后面用这个密钥去签名apk的时候，会提示找不到证书链！
+
+具体参数含义，请看这里 https://developer.android.com/tools/publishing/app-signing.html[app-signing]
+
+这个命令完成后，会在当前目录生成一个magic.keystore密钥文件
+有了密钥，我们就可以通过下面的命令，给apk进行签名：
+
+[source, bat]
+jarsigner -verbose -sigalg MD5withRSA -digestalg SHA1 -keystore magic.keystore -signedjar mota50_signed.apk newmota50.apk magic.keystore <1>
+
+<1> 由于在jdk7中，默认的签名算法已经改变了，所以你必须自己指定签名算法(-sigalg)和摘要算法(-digestalg)。否则签名无效，无法安装。
+
+这个命令就是用magic.keystore密钥给newmota50.apk签名，并生成一个mota50_signed.apk的文件，这就是最终的文件了。
+
+当然，上面介绍的是手动签名。你也可以通过eclipse，或者其他的IDE来进行签名，网上也有一个 auto_signed图形工具来签名。这里就不在复述。
+
+安装的时候，你可以安装在android emulator里，或者真机里：
+
+[source, bat]
+adb install mota50_signed.apk
