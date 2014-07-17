@@ -1,19 +1,19 @@
-= \__func__，\__line__，\__file__
+= \\__func__，\\__line__，\\__file__
 WEN Pingbo <wengpingbo@gmail.com>
 Jul 23 2013
 
 在阅读源代码的时候，经常见到这3个预先定义好的宏，下面说说他们的意思：
 [horizontal]
-\__func__:: 就是代表当前的函数名
-\__line__:: 当前的行数
-\__file__:: 当前的文件名
+\\__func__:: 就是代表当前的函数名
+\\__line__:: 当前的行数
+\\__file__:: 当前的文件名
 
 这3个预先定义好的宏经常用于错误输出中，比如：
 
 [source, c]
 fprintf(stderr,"critical error in %s, func: %, line: %s",__file__,__func__,__line__);
 
-gcc在早先的时候就已经支持用\__FUNCTION__， 不过后来c99定义了一个\__func__，功能其实都一样
+gcc在早先的时候就已经支持用\\__FUNCTION__， 不过后来c99定义了一个\\__func__，功能其实都一样
 
 如果过多的在代码中使用这些宏，会不会对程序性能有影响呢？
 其实不会的，因为这些预先定义的宏，在编译的时候，就会替换掉，不会给程序增加负担:)
