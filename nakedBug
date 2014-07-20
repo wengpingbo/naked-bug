@@ -1,0 +1,181 @@
+#!/bin/env python
+
+import os
+import sys
+import yaml
+import argparse
+import logging
+import subprocess
+
+class nakedBug:
+	def __init__(self, args):
+		self.scriptPath = os.path.dirname(os.path.realpath(__file__))
+		self.workPath = os.getcwd()
+		self.postList = args.post
+		# env check
+		if os.system('which asciidoctor-safe > /dev/null 2>&1') != 0:
+			logging.error('asciidoctor-safe not found, \
+					please install asciidoctor first')
+			sys.exit(1)
+		self.configFile = os.path.realpath(args.conf[0])
+		if not os.path.exists(self.configFile):
+			logging.error("config file %s not exists", self.configFile)
+			sys.exit(1)
+		self.backendDir = os.path.realpath(args.backend[0])
+		if not os.path.exists(self.backendDir):
+			logging.error("backend dir %s not exists", self.backendDir)
+			sys.exit(1)
+		self.outDir = os.path.realpath(args.outdir[0])
+		if not os.path.exists(self.outDir):
+			os.system("mkdir -p " + self.outDir)
+		# load config file
+		try:
+			self.configData = yaml.load(open(self.configFile, 'r'))
+		except yaml.YAMLError, exc:
+			logging.error("parse config file %s error", self.configFile)
+			sys.exit(1)
+			
+	# return the command line for subprocess.call
+	# return None on error
+	def parse_filename(self, path):
+		cmdline = []
+		cmdline.extend(["asciidoctor-safe", 
+			"-a", "linkcss", 
+			"-a", 'stylesheet="none"'])
+		path_base = os.path.basename(path).split('.')
+		maskNum = int(path_base[len(path_base) - 2])
+		path_basename = os.path.splitext(os.path.basename(path))[0]
+		path_basename = os.path.splitext(path_basename)[0]
+		try:
+			catalog = self.configData['mask_def']['catalog'][maskNum & 0xff]
+		except KeyError:
+			catalog = None
+		try:
+			codestyle = \
+					self.configData['mask_def']['codestyle'][(maskNum >> 8) & 0xf]
+		except KeyError:
+			codestyle = None
+		try:
+			backend = self.configData['mask_def']['backend'][(maskNum >> 12) & 0xf]
+		except KeyError:
+			backend = None
+	
+		if (catalog == None or codestyle == None or backend == None):
+			logging.warning("unknown mask num %d, skip file %s", maskNum, path)
+			return None
+		else:
+			cmdline.append("-T")
+			cmdline.append(self.backendDir + '/' + backend)
+			cmdline.append("-a")
+			cmdline.append("source-highlighter=" + codestyle)
+			cmdline.append("-D")
+			cmdline.append(self.outDir + '/' + catalog + '/' + path_basename)
+			cmdline.append(path)
+			return cmdline
+	
+	def compile_file(self, path):
+		if (os.path.isdir(path)):
+			logging.warning("ignore dir %s", path)
+		else:
+			cmdline = self.parse_filename(path)
+			if (cmdline == None):
+				return
+			os.system("mkdir -p " + cmdline[-2])
+			logging.info("compile file %s", path)
+			subprocess.call(cmdline)
+	
+	def build(self):
+		# transverse the posts
+		for path in self.postList:
+			path = os.path.relpath(path)
+			if (not os.path.exists(path)):
+				logging.warning("%s not exists", path)
+			else:
+				if(not os.path.isdir(path)):
+					self.compile_file(path)
+				else:
+					for root, dirs, files in os.walk(path):
+						for pfile in files:
+							if pfile.endswith(".adoc") or \
+								pfile.endswith(".ad"):
+									file_path = os.path.join(root, pfile)
+									self.compile_file(file_path)
+	
+def getArgsParser():
+	nb_path = os.getenv("NAKEDBUG_DIR")
+	if nb_path == None:
+		nb_path = os.getenv("HOME") + '/' + '.nakedbug'
+	nb_path = os.path.realpath(nb_path)
+	if not os.path.exists(nb_path):
+		logging.error("can not find nakedBug in %s", nb_path)
+		logging.error("you can set NAKEDBUG_DIR to specify the nakedBug location")
+		logging.error("or put nakedBug local part in $HOME/.nakedbug")
+		sys.exit(1)
+	parser = argparse.ArgumentParser(prog='nakedBug', 
+									description="nakedBug tool \
+			to make generating blog easier.")
+	parser.add_argument("-c", "--conf",
+			nargs=1,
+			default=[nb_path + "/config.yaml"],
+			metavar="configFile",
+			help="specify the local config file")
+	parser.add_argument('post',
+			nargs='+',
+			help='specify the post file')
+	parser.add_argument('-o', '--outdir',
+			action='store',
+			nargs=1,
+			metavar='outdir',
+			default=["article"],
+			help='specify the compile output dir')
+	parser.add_argument('-b', '--backend',
+			action='store',
+			nargs=1,
+			metavar='dir',
+			default=[nb_path + '/asciidoctor'],
+			help='specify the backend base dir')
+	return parser
+"""
+	subparser = parser.add_subparsers(help='subcommand')
+
+	post_add = subparser.add_parser("add", help="add posts to a list")
+	post_add.add_argument('post',
+			action="append",
+			nargs='+', 
+			help='add posts to the post list, if post is dir, \
+					only *.ad and *.adoc are included to post list.')
+	post_add.add_argument('-t', '--target',
+			nargs=1,
+			default='none',
+			metavar='targetFile',
+			help='specify the post list file, default stdout')
+	post_add.set_defaults(func=ahandler)
+
+	post_build = subparser.add_parser("build", 
+			help="build posts from a list")
+	post_build.add_argument('list',
+			nargs='+',
+			help='compile post in lists file')
+	post_build.add_argument('-o', '--outdir',
+			nargs=1,
+			metavar='outdir',
+			help='specify the compile output dir')
+	post_build.set_defaults(func=bhandler)
+	return parser
+"""
+
+def main():
+	# logging setting
+	logging.basicConfig(format='[nakedBug] %(levelname)s: %(message)s',
+			level=logging.DEBUG)
+
+	# parse the argument
+	args = getArgsParser().parse_args()
+
+	# execute the actions
+	nb = nakedBug(args)
+	nb.build()
+
+if __name__ == "__main__":
+	main()
+
