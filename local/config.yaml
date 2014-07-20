@@ -8,7 +8,7 @@
 blogtitle: "Pingbo Wen's Blog"
 
 # must add protocol before the url
-blogroot: "http://192.168.1.106/blog"
+blogroot: "http://pluvia.sinaapp.com"
 
 # your posts location, each post should have a separated dir
 # eg. 
@@ -23,16 +23,27 @@ blogroot: "http://192.168.1.106/blog"
 #                   | --- ....
 # related to blog root path
 # the default posts location is article
+# filename format: filename.MASK.adoc
+# MASK:
+#   0~7bit: catalog code <0 is default, range: 1~255>
+#   8~11bit: highlight style code <0 is none, range: 1~15>
+#   12~15bit: backend code <0 is standard asciidoctor template, range: 1~15>
 
-# Specify the nav bar items' name icon, and related path
-# Because using bootstrap in nakedBug, you can use some inherit icon, for
-# details about those icons, visit
-# http://getbootstrap.com/2.3.2/base-css.html#icons
-nav_items: 
-    Project: 
-        icon: th
-        url: "#"
-    About me: 
-        icon: user
-        url: "#"
+# MASK definition:
+mask_def:
+    catalog:
+        1: "android"
+        2: "c-faq"
+        3: "embedded_system"
+        4: "linux_tips"
+        5: "security"
+# current asciidoctor support highlighters
+    codestyle:
+        1: "coderay"
+        2: "highlightjs"
+        3: "prettify"
+        4: "pygments"
+    backend:
+        1: "simple"
+        2: "small"
 ...
