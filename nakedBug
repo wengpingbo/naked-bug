@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 import os
 import sys
@@ -43,24 +43,32 @@ class nakedBug:
 			"-a", "linkcss", 
 			"-a", 'stylesheet="none"'])
 		path_base = os.path.basename(path).split('.')
-		maskNum = int(path_base[len(path_base) - 2])
+		try:
+			maskNum = int(path_base[len(path_base) - 2])
+		except ValueError:
+			maskNum = 0;
 		path_basename = os.path.splitext(os.path.basename(path))[0]
 		path_basename = os.path.splitext(path_basename)[0]
-		try:
-			catalog = self.configData['mask_def']['catalog'][maskNum & 0xff]
-		except KeyError:
-			logging.warning("Unknown catalog mask number in %s, using other by default", path)
+		if (maskNum != 0):
+			try:
+				catalog = self.configData['mask_def']['catalog'][maskNum & 0xff]
+			except KeyError:
+				logging.warning("Unknown catalog mask number in %s, using other by default", path)
+				catalog = "other"
+			try:
+				codestyle = \
+						self.configData['mask_def']['codestyle'][(maskNum >> 8) & 0xf]
+			except KeyError:
+				logging.warning("Unknown codestyle mask number in %s, using highlightjs by default", path)
+				codestyle = "highlightjs"
+			try:
+				backend = self.configData['mask_def']['backend'][(maskNum >> 12) & 0xf]
+			except KeyError:
+				logging.warning("Unknown backend mask number in %s, using small by default", path)
+				backend = "small"
+		else:
 			catalog = "other"
-		try:
-			codestyle = \
-					self.configData['mask_def']['codestyle'][(maskNum >> 8) & 0xf]
-		except KeyError:
-			logging.warning("Unknown codestyle mask number in %s, using highlightjs by default", path)
 			codestyle = "highlightjs"
-		try:
-			backend = self.configData['mask_def']['backend'][(maskNum >> 12) & 0xf]
-		except KeyError:
-			logging.warning("Unknown backend mask number in %s, using small by default", path)
 			backend = "small"
 	
 		cmdline.append("-T")
