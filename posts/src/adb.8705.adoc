@@ -23,3 +23,5 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", ATTR{idProduct}=="4e12", MODE="0600", 
 我们也可以简单粗暴的用chmod命令临时改变/dev/bus/usb/下面的设备节点权限。
 
 有的时候，你会发现按照上面做了，还是不行。请把udev服务重启，把ADB Server进程重启，把USB重插一遍，一般就能解决。如果还不能解决，我觉得你该检查你的USB线了。
+
+this is a test
